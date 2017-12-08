@@ -131,7 +131,7 @@ JSONEditor.prototype = {
       this.callbacks = this.callbacks || {}
       this.callbacks[event] = this.callbacks[event] || []
       let newcallbacks = []
-      for(let i=0; i<this.callbacks[event].length; i++) {
+      for (let i=0; i<this.callbacks[event].length; i++) {
         if (this.callbacks[event][i]===callback) continue
         newcallbacks.push(this.callbacks[event][i])
       }this.callbacks[event] = newcallbacks
@@ -469,37 +469,40 @@ JSONEditor.prototype = {
           // If type is only defined in the first schema, keep it
           if (!obj2.type || !obj2.type.length) {
             extended.type = val
-          }// If type is defined in both schemas, do an intersect
-          else {
+          } else {
+            // If type is defined in both schemas, do an intersect
             extended.type = val.filter(function (n) {
               return obj2.type.indexOf(n) !== -1
             })
           }// If there's only 1 type and it's a primitive, use a string instead of array
           if (extended.type.length === 1 && typeof extended.type[0] === 'string') {
             extended.type = extended.type[0]
-          }// Remove the type property if it's empty
-          else if (extended.type.length === 0) {
+          } else if (extended.type.length === 0) {
+            // Remove the type property if it's empty
             delete extended.type
-          }}// All other arrays should be intersected (enum, etc.)
-        else if (typeof val === 'object' && Array.isArray(val)){
+          }} else if (typeof val === 'object' && Array.isArray(val)){
+          // All other arrays should be intersected (enum, etc.)
           extended[prop] = val.filter(function (n) {
             return obj2[prop].indexOf(n) !== -1
           })
         }// Objects should be recursively merged
         else if (typeof val === 'object' && val !== null) {
           extended[prop] = self.extendSchemas(val, obj2[prop])
-        }// Otherwise, use the first value
-        else {
+        }else {
+          // Otherwise, use the first value
           extended[prop] = val
-        }}// Otherwise, just use the one in obj1
-      else {
+        }
+       } else {
+        // Otherwise, just use the one in obj1
         extended[prop] = val
-      }})
+      }
+    })
     // Properties in obj2 that aren't in obj1
     $each(obj2, function (prop, val) {
       if (typeof obj1[prop] === 'undefined') {
         extended[prop] = val
-      }})
+      }
+    })
 
     return extended
   }

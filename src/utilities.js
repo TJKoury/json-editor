@@ -4,16 +4,16 @@
  * @param obj
  * @returns {boolean}
  */
-let $isplainobject = function( obj ) {
+let $isplainobject = function (obj) {
   // Not plain objects:
-  // - Any object or value whose internal [[Class]] property is not "[object Object]"
+  // - Any object or value whose internal [[Class]] property is not '[object Object]'
   // - DOM nodes
   // - window
-  if (typeof obj !== "object" || obj.nodeType || (obj !== null && obj === obj.window)) {
+  if (typeof obj !== 'object' || obj.nodeType || (obj !== null && obj === obj.window)) {
     return false
   }
 
-  if (obj.constructor && !Object.prototype.hasOwnProperty.call(obj.constructor.prototype, "isPrototypeOf")) {
+  if (obj.constructor && !Object.prototype.hasOwnProperty.call(obj.constructor.prototype, 'isPrototypeOf')) {
     return false
   }
 
@@ -22,17 +22,16 @@ let $isplainobject = function( obj ) {
   return true
 }
 
-let $extend = function(destination) {
-  let source, i,property
-  for(i=1; i<arguments.length; i++) {
+let $extend = function (destination) {
+  let source, property
+  for (let i = 1; i < arguments.length; i++) {
     source = arguments[i]
     for (property in source) {
-      if(!source.hasOwnProperty(property)) continue
-      if(source[property] && $isplainobject(source[property])) {
-        if(!destination.hasOwnProperty(property)) destination[property] = {}
+      if (!source.hasOwnProperty(property)) continue
+      if (source[property] && $isplainobject(source[property])) {
+        if (!destination.hasOwnProperty(property)) destination[property] = {}
         $extend(destination[property], source[property])
-      }
-      else {
+      } else {
         destination[property] = source[property]
       }
     }
@@ -40,37 +39,35 @@ let $extend = function(destination) {
   return destination
 }
 
-let $each = function(obj,callback) {
-  if(!obj || typeof obj !== "object") return
+let $each = function (obj, callback) {
+  if (!obj || typeof obj !== 'object') return
   let i
-  if(Array.isArray(obj) || (typeof obj.length === 'number' && obj.length > 0 && (obj.length - 1) in obj)) {
-    for(i=0; i<obj.length; i++) {
-      if(callback(i,obj[i])===false) return
+  if (Array.isArray(obj) || (typeof obj.length === 'number' && obj.length > 0 && (obj.length - 1) in obj)) {
+    for (let i = 0; i < obj.length; i++) {
+      if (callback(i, obj[i]) === false) return
     }
-  }
-  else {
+  } else {
     if (Object.keys) {
       let keys = Object.keys(obj)
-      for(i=0; i<keys.length; i++) {
-        if(callback(keys[i],obj[keys[i]])===false) return
+      for (let i = 0; i < keys.length; i++) {
+        if (callback(keys[i], obj[keys[i]]) === false) return
       }
-    }
-    else {
-      for(i in obj) {
-        if(!obj.hasOwnProperty(i)) continue
-        if(callback(i,obj[i])===false) return
+    } else {
+      for (i in obj) {
+        if (!obj.hasOwnProperty(i)) continue
+        if (callback(i, obj[i]) === false) return
       }
     }
   }
 }
 
-let $trigger = function(el,event) {
+let $trigger = function (el, event) {
   let e = document.createEvent('HTMLEvents')
   e.initEvent(event, true, true)
   el.dispatchEvent(e)
 }
-let $triggerc = function(el,event) {
-  let e = new CustomEvent (event, {
+let $triggerc = function (el, event) {
+  let e = new CustomEvent(event, {
     bubbles: true,
     cancelable: true
   })
@@ -78,4 +75,4 @@ let $triggerc = function(el,event) {
   el.dispatchEvent(e)
 }
 
-export {$isplainobject, $extend, $each, $trigger}
+export {$isplainobject, $extend, $each, $trigger, $triggerc}
