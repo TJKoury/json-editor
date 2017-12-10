@@ -1,10 +1,10 @@
-import {$extend, $each}from './utilities'
+import { $extend, $each } from './utilities'
 import Validator from './validator'
 
 let JSONEditor = function (element, options) {
   if (!(element instanceof Element)) {
     throw new Error('element should be an instance of Element')
-  }options = $extend({}, JSONEditor.defaults.options, options||{})
+  } options = $extend({}, JSONEditor.defaults.options, options || {})
   this.element = element
   this.options = options
   this.init()
@@ -15,12 +15,12 @@ JSONEditor.prototype = {
   constructor: JSONEditor,
   init: function () {
     let self = this
-    
+
     this.ready = false
 
     let theme_class = JSONEditor.defaults.themes[this.options.theme || JSONEditor.defaults.theme]
     if (!theme_class) throw 'Unknown theme ' + (this.options.theme || JSONEditor.defaults.theme)
-    
+
     this.schema = this.options.schema
     this.theme = new theme_class()
     this.template = this.options.template
@@ -32,21 +32,21 @@ JSONEditor.prototype = {
 
     this.root_container = this.theme.getContainer()
     this.element.appendChild(this.root_container)
-    
+
     this.translate = this.options.translate || JSONEditor.defaults.translate
 
     // Fetch all external refs via ajax
     this._loadExternalRefs(this.schema, function () {
       self._getDefinitions(self.schema)
-      
+
       // Validator options
       let validator_options = {}
       if (self.options.custom_validators) {
         validator_options.custom_validators = self.options.custom_validators
       }
-      
+
       self.validator = new JSONEditor.Validator(self, null, validator_options)
-      
+
       // Create the root editor
       let editor_class = self.getEditorClass(self.schema)
       self.root = self.createEditor(editor_class, {
@@ -55,7 +55,7 @@ JSONEditor.prototype = {
         required: true,
         container: self.root_container
       })
-      
+
       self.root.preBuild()
       self.root.build()
       self.root.postBuild()
@@ -90,18 +90,19 @@ JSONEditor.prototype = {
   },
   validate: function (value) {
     if (!this.ready) throw 'JSON Editor not ready yet.  Listen for "ready" event before validating'
-    
+
     // Custom value
     if (arguments.length === 1) {
       return this.validator.validate(value)
     }// Current value (use cached result)
     else {
       return this.validation_results
-    }},
+    }
+  },
   destroy: function () {
     if (this.destroyed) return
     if (!this.ready) return
-    
+
     this.schema = null
     this.options = null
     this.root.destroy()
@@ -115,14 +116,14 @@ JSONEditor.prototype = {
     this.__data = null
     this.ready = false
     this.element.innerHTML = ''
-    
+
     this.destroyed = true
   },
   on: function (event, callback) {
     this.callbacks = this.callbacks || {}
     this.callbacks[event] = this.callbacks[event] || []
     this.callbacks[event].push(callback)
-    
+
     return this
   },
   off: function (event, callback) {
@@ -131,10 +132,10 @@ JSONEditor.prototype = {
       this.callbacks = this.callbacks || {}
       this.callbacks[event] = this.callbacks[event] || []
       let newcallbacks = []
-      for (let i=0; i<this.callbacks[event].length; i++) {
-        if (this.callbacks[event][i]===callback) continue
+      for (let i = 0; i < this.callbacks[event].length; i++) {
+        if (this.callbacks[event][i] === callback) continue
         newcallbacks.push(this.callbacks[event][i])
-      }this.callbacks[event] = newcallbacks
+      } this.callbacks[event] = newcallbacks
     }// All callbacks for a specific event
     else if (event) {
       this.callbacks = this.callbacks || {}
@@ -147,9 +148,10 @@ JSONEditor.prototype = {
   },
   trigger: function (event) {
     if (this.callbacks && this.callbacks[event] && this.callbacks[event].length) {
-      for(let i=0; i<this.callbacks[event].length; i++) {
+      for (let i = 0; i < this.callbacks[event].length; i++) {
         this.callbacks[event][i]()
-      }}return this
+      }
+    } return this
   },
   setOption: function (option, value) {
     if (option === 'show_errors') {
@@ -157,8 +159,8 @@ JSONEditor.prototype = {
       this.onChange()
     }// Only the `show_errors` option is supported for now
     else {
-      throw 'Option '+option+' must be set during instantiation and cannot be changed later'
-    }return this
+      throw 'Option ' + option + ' must be set during instantiation and cannot be changed later'
+    } return this
   },
   getEditorClass: function (schema) {
     let classname
@@ -171,40 +173,42 @@ JSONEditor.prototype = {
         if (JSONEditor.defaults.editors[tmp]) {
           classname = tmp
           return false
-        }}})
+        }
+      }
+    })
 
-    if (!classname) throw 'Unknown editor for schema '+JSON.stringify(schema)
-    if (!JSONEditor.defaults.editors[classname]) throw 'Unknown editor '+classname
+    if (!classname) throw 'Unknown editor for schema ' + JSON.stringify(schema)
+    if (!JSONEditor.defaults.editors[classname]) throw 'Unknown editor ' + classname
 
     return JSONEditor.defaults.editors[classname]
   },
   createEditor: function (editor_class, options) {
-    options = $extend({}, editor_class.options||{}, options)
+    options = $extend({}, editor_class.options || {}, options)
     return new editor_class(options)
   },
   onChange: function () {
     if (!this.ready) return
-    
+
     if (this.firing_change) return
     this.firing_change = true
-    
+
     let self = this
-    
+
     window.requestAnimationFrame(function () {
       self.firing_change = false
       if (!self.ready) return
 
       // Validate and cache results
       self.validation_results = self.validator.validate(self.root.getValue())
-      
+
       if (self.options.show_errors !== 'never') {
         self.root.showValidationErrors(self.validation_results)
-      }else {
+      } else {
         self.root.showValidationErrors([])
       }// Fire change event
       self.trigger('change')
     })
-    
+
     return this
   },
   compileTemplate: function (template, name) {
@@ -214,14 +218,14 @@ JSONEditor.prototype = {
 
     // Specifying a preset engine
     if (typeof name === 'string') {
-      if (!JSONEditor.defaults.templates[name]) throw 'Unknown template engine '+name
+      if (!JSONEditor.defaults.templates[name]) throw 'Unknown template engine ' + name
       engine = JSONEditor.defaults.templates[name]()
 
-      if (!engine) throw 'Template engine '+name+' missing required library.'
+      if (!engine) throw 'Template engine ' + name + ' missing required library.'
     }// Specifying a custom engine
     else {
       engine = name
-    }if (!engine) throw 'No template engine set'
+    } if (!engine) throw 'No template engine set'
     if (!engine.compile) throw 'Invalid template engine set'
 
     return engine.compile(template)
@@ -230,19 +234,20 @@ JSONEditor.prototype = {
     // Setting data
     if (arguments.length === 3) {
       let uuid
-      if (el.hasAttribute('data-jsoneditor-'+key)) {
-        uuid = el.getAttribute('data-jsoneditor-'+key)
-      }else {
+      if (el.hasAttribute('data-jsoneditor-' + key)) {
+        uuid = el.getAttribute('data-jsoneditor-' + key)
+      } else {
         uuid = this.uuid++
-        el.setAttribute('data-jsoneditor-'+key, uuid)
-      }this.__data[uuid] = value
+        el.setAttribute('data-jsoneditor-' + key, uuid)
+      } this.__data[uuid] = value
     }// Getting data
     else {
       // No data stored
-      if (!el.hasAttribute('data-jsoneditor-'+key)) return null
-      
-      return this.__data[el.getAttribute('data-jsoneditor-'+key)]
-    }},
+      if (!el.hasAttribute('data-jsoneditor-' + key)) return null
+
+      return this.__data[el.getAttribute('data-jsoneditor-' + key)]
+    }
+  },
   registerEditor: function (editor) {
     this.editors = this.editors || {}
     this.editors[editor.path] = editor
@@ -261,7 +266,7 @@ JSONEditor.prototype = {
     this.watchlist = this.watchlist || {}
     this.watchlist[path] = this.watchlist[path] || []
     this.watchlist[path].push(callback)
-    
+
     return this
   },
   unwatch: function (path, callback) {
@@ -270,18 +275,19 @@ JSONEditor.prototype = {
     if (!callback) {
       this.watchlist[path] = null
       return this
-    }let newlist = []
-    for(let i=0; i<this.watchlist[path].length; i++) {
+    } let newlist = []
+    for (let i = 0; i < this.watchlist[path].length; i++) {
       if (this.watchlist[path][i] === callback) continue
       else newlist.push(this.watchlist[path][i])
-    }this.watchlist[path] = newlist.length? newlist : null
+    } this.watchlist[path] = newlist.length ? newlist : null
     return this
   },
   notifyWatchers: function (path) {
     if (!this.watchlist || !this.watchlist[path]) return this
-    for(let i=0; i<this.watchlist[path].length; i++) {
+    for (let i = 0; i < this.watchlist[path].length; i++) {
       this.watchlist[path][i]()
-    }},
+    }
+  },
   isEnabled: function () {
     return !this.root || this.root.isEnabled()
   },
@@ -294,89 +300,97 @@ JSONEditor.prototype = {
   _getDefinitions: function (schema, path) {
     path = path || '#/definitions/'
     if (schema.definitions) {
-      for(let i in schema.definitions) {
+      for (let i in schema.definitions) {
         if (!schema.definitions.hasOwnProperty(i)) continue
-        this.refs[path+i] = schema.definitions[i]
+        this.refs[path + i] = schema.definitions[i]
         if (schema.definitions[i].definitions) {
-          this._getDefinitions(schema.definitions[i], path+i+'/definitions/')
-        }}}},
+          this._getDefinitions(schema.definitions[i], path + i + '/definitions/')
+        }
+      }
+    }
+  },
   _getExternalRefs: function (schema) {
     let refs = {}
     let merge_refs = function (newrefs) {
-      for(let i in newrefs) {
+      for (let i in newrefs) {
         if (newrefs.hasOwnProperty(i)) {
           refs[i] = true
         }
       }
     }
-        if (schema.$ref && typeof schema.$ref !== 'object' && schema.$ref.substr(0,1) !== '#' && !this.refs[schema.$ref]) {
+    if (schema.$ref && typeof schema.$ref !== 'object' && schema.$ref.substr(0, 1) !== '#' && !this.refs[schema.$ref]) {
       refs[schema.$ref] = true
-    }for(let i in schema) {
+    } for (let i in schema) {
       if (!schema.hasOwnProperty(i)) continue
       if (schema[i] && typeof schema[i] === 'object' && Array.isArray(schema[i])) {
-        for(let j=0; j<schema[i].length; j++) {
-          if (typeof schema[i][j]==='object') {
+        for (let j = 0; j < schema[i].length; j++) {
+          if (typeof schema[i][j] === 'object') {
             merge_refs(this._getExternalRefs(schema[i][j]))
-          }}}else if (schema[i] && typeof schema[i] === 'object') {
+          }
+        }
+      } else if (schema[i] && typeof schema[i] === 'object') {
         merge_refs(this._getExternalRefs(schema[i]))
-      }}return refs
+      }
+    } return refs
   },
   _loadExternalRefs: function (schema, callback) {
     let self = this
     let refs = this._getExternalRefs(schema)
-    
+
     let done = 0, waiting = 0, callback_fired = false
-    
+
     $each(refs, function (url) {
       if (self.refs[url]) return
-      if (!self.options.ajax) throw 'Must set ajax option to true to load external ref '+url
+      if (!self.options.ajax) throw 'Must set ajax option to true to load external ref ' + url
       self.refs[url] = 'loading'
       waiting++
 
-      let r = new XMLHttpRequest(); 
+      let r = new XMLHttpRequest()
       r.open('GET', url, true)
       r.onreadystatechange = function () {
-        if (r.readyState != 4) return; 
+        if (r.readyState != 4) return
         // Request succeeded
         if (r.status === 200) {
           let response
           try {
             response = JSON.parse(r.responseText)
-          }catch(e) {
+          } catch (e) {
             window.console.log(e)
-            throw 'Failed to parse external ref '+url
-          }if (!response || typeof response !== 'object') throw 'External ref does not contain a valid schema - '+url
-          
+            throw 'Failed to parse external ref ' + url
+          } if (!response || typeof response !== 'object') throw 'External ref does not contain a valid schema - ' + url
+
           self.refs[url] = response
           self._loadExternalRefs(response, function () {
             done++
             if (done >= waiting && !callback_fired) {
               callback_fired = true
               callback()
-            }})
+            }
+          })
         }// Request failed
         else {
           window.console.log(r)
-          throw 'Failed to fetch ref via ajax- '+url
+          throw 'Failed to fetch ref via ajax- ' + url
         }
       }
       r.send()
     })
-    
+
     if (!waiting) {
       callback()
-    }},
+    }
+  },
   expandRefs: function (schema) {
     schema = $extend({}, schema)
-    
+
     while (schema.$ref) {
       let ref = schema.$ref
       delete schema.$ref
-      
+
       if (!this.refs[ref]) ref = decodeURIComponent(ref)
-      
+
       schema = this.extendSchemas(schema, this.refs[ref])
-    }return schema
+    } return schema
   },
   expandSchema: function (schema) {
     let self = this
@@ -391,11 +405,13 @@ JSONEditor.prototype = {
           // Schema
           if (typeof value === 'object') {
             schema.type[key] = self.expandSchema(value)
-          }})
+          }
+        })
       }// Schema
       else {
         schema.type = self.expandSchema(schema.type)
-      }}// Version 3 `disallow`
+      }
+    }// Version 3 `disallow`
     if (typeof schema.disallow === 'object') {
       // Array of types
       if (Array.isArray(schema.disallow)) {
@@ -403,11 +419,13 @@ JSONEditor.prototype = {
           // Schema
           if (typeof value === 'object') {
             schema.disallow[key] = self.expandSchema(value)
-          }})
+          }
+        })
       }// Schema
       else {
         schema.disallow = self.expandSchema(schema.disallow)
-      }}// Version 4 `anyOf`
+      }
+    }// Version 4 `anyOf`
     if (schema.anyOf) {
       $each(schema.anyOf, function (key, value) {
         schema.anyOf[key] = self.expandSchema(value)
@@ -417,15 +435,16 @@ JSONEditor.prototype = {
       $each(schema.dependencies, function (key, value) {
         if (typeof value === 'object' && !(Array.isArray(value))) {
           schema.dependencies[key] = self.expandSchema(value)
-        }})
+        }
+      })
     }// Version 4 `not`
     if (schema.not) {
       schema.not = this.expandSchema(schema.not)
     }// allOf schemas should be merged into the parent
     if (schema.allOf) {
-      for(i=0; i<schema.allOf.length; i++) {
+      for (i = 0; i < schema.allOf.length; i++) {
         extended = this.extendSchemas(extended, this.expandSchema(schema.allOf[i]))
-      }delete extended.allOf
+      } delete extended.allOf
     }// extends schemas should be merged into parent
     if (schema['extends']) {
       // If extends is a schema
@@ -433,16 +452,18 @@ JSONEditor.prototype = {
         extended = this.extendSchemas(extended, this.expandSchema(schema['extends']))
       }// If extends is an array of schemas
       else {
-        for(i=0; i<schema['extends'].length; i++) {
+        for (i = 0; i < schema['extends'].length; i++) {
           extended = this.extendSchemas(extended, this.expandSchema(schema['extends'][i]))
-        }}delete extended['extends']
+        }
+      } delete extended['extends']
     }// parent should be merged into oneOf schemas
     if (schema.oneOf) {
       let tmp = $extend({}, extended)
       delete tmp.oneOf
-      for(i=0; i<schema.oneOf.length; i++) {
+      for (i = 0; i < schema.oneOf.length; i++) {
         extended.oneOf[i] = this.extendSchemas(this.expandSchema(schema.oneOf[i]), tmp)
-      }}return this.expandRefs(extended)
+      }
+    } return this.expandRefs(extended)
   },
   extendSchemas: function (obj1, obj2) {
     obj1 = $extend({}, obj1)
@@ -454,7 +475,7 @@ JSONEditor.prototype = {
       // If this key is also defined in obj2, merge them
       if (typeof obj2[prop] !== 'undefined') {
         // Required and defaultProperties arrays should be unioned together
-        if ((prop === 'required'||prop === 'defaultProperties') && typeof val === 'object' && Array.isArray(val)) {
+        if ((prop === 'required' || prop === 'defaultProperties') && typeof val === 'object' && Array.isArray(val)) {
           // Union arrays and unique
           extended[prop] = val.concat(obj2[prop]).reduce(function (p, c) {
             if (p.indexOf(c) < 0) p.push(c)
@@ -480,19 +501,20 @@ JSONEditor.prototype = {
           } else if (extended.type.length === 0) {
             // Remove the type property if it's empty
             delete extended.type
-          }} else if (typeof val === 'object' && Array.isArray(val)){
+          }
+        } else if (typeof val === 'object' && Array.isArray(val)) {
           // All other arrays should be intersected (enum, etc.)
           extended[prop] = val.filter(function (n) {
             return obj2[prop].indexOf(n) !== -1
           })
-        }// Objects should be recursively merged
-        else if (typeof val === 'object' && val !== null) {
+        } else if (typeof val === 'object' && val !== null) {
+          // Objects should be recursively merged
           extended[prop] = self.extendSchemas(val, obj2[prop])
-        }else {
+        } else {
           // Otherwise, use the first value
           extended[prop] = val
         }
-       } else {
+      } else {
         // Otherwise, just use the one in obj1
         extended[prop] = val
       }
@@ -517,3 +539,5 @@ JSONEditor.defaults = {
   custom_validators: []
 }
 JSONEditor.Validator = Validator
+
+export default JSONEditor
