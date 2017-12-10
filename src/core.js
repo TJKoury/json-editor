@@ -407,8 +407,8 @@ JSONEditor.prototype = {
             schema.type[key] = self.expandSchema(value)
           }
         })
-      }// Schema
-      else {
+      } else {
+        // Schema
         schema.type = self.expandSchema(schema.type)
       }
     }// Version 3 `disallow`
@@ -421,8 +421,8 @@ JSONEditor.prototype = {
             schema.disallow[key] = self.expandSchema(value)
           }
         })
-      }// Schema
-      else {
+      } else {
+        // Schema
         schema.disallow = self.expandSchema(schema.disallow)
       }
     }// Version 4 `anyOf`
@@ -450,8 +450,8 @@ JSONEditor.prototype = {
       // If extends is a schema
       if (!(Array.isArray(schema['extends']))) {
         extended = this.extendSchemas(extended, this.expandSchema(schema['extends']))
-      }// If extends is an array of schemas
-      else {
+      } else {
+        // If extends is an array of schemas
         for (i = 0; i < schema['extends'].length; i++) {
           extended = this.extendSchemas(extended, this.expandSchema(schema['extends'][i]))
         }
@@ -481,8 +481,8 @@ JSONEditor.prototype = {
             if (p.indexOf(c) < 0) p.push(c)
             return p
           }, [])
-        }// Type should be intersected and is either an array or string
-        else if (prop === 'type' && (typeof val === 'string' || Array.isArray(val))) {
+        } else if (prop === 'type' && (typeof val === 'string' || Array.isArray(val))) {
+          // Type should be intersected and is either an array or string
           // Make sure we're dealing with arrays
           if (typeof val === 'string') val = [val]
           if (typeof obj2.type === 'string') obj2.type = [obj2.type]

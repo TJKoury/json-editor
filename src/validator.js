@@ -314,9 +314,8 @@ export default Class.extend({
           })
         }
       }
-    }
-    // Array specific validation
-    else if (typeof value === 'object' && value !== null && Array.isArray(value)) {
+    } else if (typeof value === 'object' && value !== null && Array.isArray(value)) {
+       // Array specific validation
       // `items` and `additionalItems`
       if (schema.items) {
         // `items` is an array
@@ -326,18 +325,15 @@ export default Class.extend({
             // Validate against it
             if (schema.items[i]) {
               errors = errors.concat(this._validateSchema(schema.items[i], value[i], path + '.' + i))
-            }
-            // If all additional items are allowed
-            else if (schema.additionalItems === true) {
+            } else if (schema.additionalItems === true) {
+              // If all additional items are allowed
               break
-            }
-            // If additional items is a schema
-            // TODO: Incompatibility between version 3 and 4 of the spec
-            else if (schema.additionalItems) {
+            } else if (schema.additionalItems) {
+              // If additional items is a schema
+              // TODO: Incompatibility between version 3 and 4 of the spec
               errors = errors.concat(this._validateSchema(schema.additionalItems, value[i], path + '.' + i))
-            }
-            // If no additional items are allowed
-            else if (schema.additionalItems === false) {
+            } else if (schema.additionalItems === false) {
+              // If no additional items are allowed
               errors.push({
                 path: path,
                 property: 'additionalItems',
