@@ -1,10 +1,12 @@
 import { $extend, $each } from './utilities'
+import {defaults, plugins} from './defaults'
 import Validator from './validator'
 
 let JSONEditor = function (element, options) {
   if (!(element instanceof Element)) {
     throw new Error('element should be an instance of Element')
-  } options = $extend({}, JSONEditor.defaults.options, options || {})
+  }
+  options = $extend({}, JSONEditor.defaults.options, options || {})
   this.element = element
   this.options = options
   this.init()
@@ -18,17 +20,17 @@ JSONEditor.prototype = {
 
     this.ready = false
 
-    let theme_class = JSONEditor.defaults.themes[this.options.theme || JSONEditor.defaults.theme]
-    if (!theme_class) throw 'Unknown theme ' + (this.options.theme || JSONEditor.defaults.theme)
+    let ThemeClass = JSONEditor.defaults.themes[this.options.theme || JSONEditor.defaults.theme]
+    if (!ThemeClass) throw new Error('Unknown theme ' + (this.options.theme || JSONEditor.defaults.theme))
 
     this.schema = this.options.schema
-    this.theme = new theme_class()
+    this.theme = new ThemeClass()
     this.template = this.options.template
     this.refs = this.options.refs || {}
     this.uuid = 0
     this.__data = {}
-    let icon_class = JSONEditor.defaults.iconlibs[this.options.iconlib || JSONEditor.defaults.iconlib]
-    if (icon_class) this.iconlib = new icon_class()
+    let IconClass = JSONEditor.defaults.iconlibs[this.options.iconlib || JSONEditor.defaults.iconlib]
+    if (IconClass) this.iconlib = new IconClass()
 
     this.root_container = this.theme.getContainer()
     this.element.appendChild(this.root_container)
@@ -40,16 +42,16 @@ JSONEditor.prototype = {
       self._getDefinitions(self.schema)
 
       // Validator options
-      let validator_options = {}
+      let validatorOptions = {}
       if (self.options.custom_validators) {
-        validator_options.custom_validators = self.options.custom_validators
+        validatorOptions.custom_validators = self.options.custom_validators
       }
 
-      self.validator = new JSONEditor.Validator(self, null, validator_options)
+      self.validator = new JSONEditor.Validator(self, null, validatorOptions)
 
       // Create the root editor
-      let editor_class = self.getEditorClass(self.schema)
-      self.root = self.createEditor(editor_class, {
+      let EditorClass = self.getEditorClass(self.schema)
+      self.root = self.createEditor(EditorClass, {
         jsoneditor: self,
         schema: self.schema,
         required: true,
@@ -78,24 +80,24 @@ JSONEditor.prototype = {
     })
   },
   getValue: function () {
-    if (!this.ready) throw 'JSON Editor not ready yet.  Listen for "ready" event before getting the value'
+    if (!this.ready) throw new Error('JSON Editor not ready yet.  Listen for "ready" event before getting the value')
 
     return this.root.getValue()
   },
   setValue: function (value) {
-    if (!this.ready) throw 'JSON Editor not ready yet.  Listen for "ready" event before setting the value'
+    if (!this.ready) throw new Error('JSON Editor not ready yet.  Listen for "ready" event before setting the value')
 
     this.root.setValue(value)
     return this
   },
   validate: function (value) {
-    if (!this.ready) throw 'JSON Editor not ready yet.  Listen for "ready" event before validating'
+    if (!this.ready) throw new Error('JSON Editor not ready yet.  Listen for "ready" event before validating')
 
     // Custom value
     if (arguments.length === 1) {
       return this.validator.validate(value)
-    }// Current value (use cached result)
-    else {
+    } else {
+      // Current value (use cached result)
       return this.validation_results
     }
   },
@@ -136,12 +138,12 @@ JSONEditor.prototype = {
         if (this.callbacks[event][i] === callback) continue
         newcallbacks.push(this.callbacks[event][i])
       } this.callbacks[event] = newcallbacks
-    }// All callbacks for a specific event
-    else if (event) {
+    } else if (event) {
+      // All callbacks for a specific event
       this.callbacks = this.callbacks || {}
       this.callbacks[event] = []
-    }// All callbacks for all events
-    else {
+    } else {
+      // All callbacks for all events
       this.callbacks = {}
     }
     return this
@@ -157,9 +159,9 @@ JSONEditor.prototype = {
     if (option === 'show_errors') {
       this.options.show_errors = value
       this.onChange()
-    }// Only the `show_errors` option is supported for now
-    else {
-      throw 'Option ' + option + ' must be set during instantiation and cannot be changed later'
+    } else {
+      // Only the `show_errors` option is supported for now
+      throw new Error('Option ' + option + ' must be set during instantiation and cannot be changed later')
     } return this
   },
   getEditorClass: function (schema) {
@@ -177,14 +179,14 @@ JSONEditor.prototype = {
       }
     })
 
-    if (!classname) throw 'Unknown editor for schema ' + JSON.stringify(schema)
-    if (!JSONEditor.defaults.editors[classname]) throw 'Unknown editor ' + classname
+    if (!classname) throw new Error('Unknown editor for schema ' + JSON.stringify(schema))
+    if (!JSONEditor.defaults.editors[classname]) throw new Error('Unknown editor ' + classname)
 
     return JSONEditor.defaults.editors[classname]
   },
-  createEditor: function (editor_class, options) {
-    options = $extend({}, editor_class.options || {}, options)
-    return new editor_class(options)
+  createEditor: function (EditorClass, options) {
+    options = $extend({}, EditorClass.options || {}, options)
+    return new EditorClass(options)
   },
   onChange: function () {
     if (!this.ready) return
@@ -218,15 +220,15 @@ JSONEditor.prototype = {
 
     // Specifying a preset engine
     if (typeof name === 'string') {
-      if (!JSONEditor.defaults.templates[name]) throw 'Unknown template engine ' + name
+      if (!JSONEditor.defaults.templates[name]) throw new Error('Unknown template engine ' + name)
       engine = JSONEditor.defaults.templates[name]()
 
-      if (!engine) throw 'Template engine ' + name + ' missing required library.'
-    }// Specifying a custom engine
-    else {
+      if (!engine) throw new Error('Template engine ' + name + ' missing required library.')
+    } else {
+      // Specifying a custom engine
       engine = name
-    } if (!engine) throw 'No template engine set'
-    if (!engine.compile) throw 'Invalid template engine set'
+    } if (!engine) throw new Error('No template engine set')
+    if (!engine.compile) throw new Error('Invalid template engine set')
 
     return engine.compile(template)
   },
@@ -240,8 +242,8 @@ JSONEditor.prototype = {
         uuid = this.uuid++
         el.setAttribute('data-jsoneditor-' + key, uuid)
       } this.__data[uuid] = value
-    }// Getting data
-    else {
+    } else {
+      // Getting data
       // No data stored
       if (!el.hasAttribute('data-jsoneditor-' + key)) return null
 
@@ -311,7 +313,7 @@ JSONEditor.prototype = {
   },
   _getExternalRefs: function (schema) {
     let refs = {}
-    let merge_refs = function (newrefs) {
+    let mergeRefs = function (newrefs) {
       for (let i in newrefs) {
         if (newrefs.hasOwnProperty(i)) {
           refs[i] = true
@@ -325,11 +327,11 @@ JSONEditor.prototype = {
       if (schema[i] && typeof schema[i] === 'object' && Array.isArray(schema[i])) {
         for (let j = 0; j < schema[i].length; j++) {
           if (typeof schema[i][j] === 'object') {
-            merge_refs(this._getExternalRefs(schema[i][j]))
+            mergeRefs(this._getExternalRefs(schema[i][j]))
           }
         }
       } else if (schema[i] && typeof schema[i] === 'object') {
-        merge_refs(this._getExternalRefs(schema[i]))
+        mergeRefs(this._getExternalRefs(schema[i]))
       }
     } return refs
   },
@@ -337,18 +339,20 @@ JSONEditor.prototype = {
     let self = this
     let refs = this._getExternalRefs(schema)
 
-    let done = 0, waiting = 0, callback_fired = false
+    let done = 0
+    let waiting = 0
+    let callbackFired = false
 
     $each(refs, function (url) {
       if (self.refs[url]) return
-      if (!self.options.ajax) throw 'Must set ajax option to true to load external ref ' + url
+      if (!self.options.ajax) throw new Error('Must set ajax option to true to load external ref ' + url)
       self.refs[url] = 'loading'
       waiting++
 
       let r = new XMLHttpRequest()
       r.open('GET', url, true)
       r.onreadystatechange = function () {
-        if (r.readyState != 4) return
+        if (r.readyState !== 4) return
         // Request succeeded
         if (r.status === 200) {
           let response
@@ -356,21 +360,21 @@ JSONEditor.prototype = {
             response = JSON.parse(r.responseText)
           } catch (e) {
             window.console.log(e)
-            throw 'Failed to parse external ref ' + url
-          } if (!response || typeof response !== 'object') throw 'External ref does not contain a valid schema - ' + url
+            throw new Error('Failed to parse external ref ' + url)
+          } if (!response || typeof response !== 'object') throw new Error('External ref does not contain a valid schema - ' + url)
 
           self.refs[url] = response
           self._loadExternalRefs(response, function () {
             done++
-            if (done >= waiting && !callback_fired) {
-              callback_fired = true
+            if (done >= waiting && !callbackFired) {
+              callbackFired = true
               callback()
             }
           })
-        }// Request failed
-        else {
+        } else {
+          // Request failed
           window.console.log(r)
-          throw 'Failed to fetch ref via ajax- ' + url
+          throw new Error('Failed to fetch ref via ajax- ' + url)
         }
       }
       r.send()
@@ -529,15 +533,8 @@ JSONEditor.prototype = {
     return extended
   }
 }
-JSONEditor.defaults = {
-  themes: {},
-  templates: {},
-  iconlibs: {},
-  editors: {},
-  languages: {},
-  resolvers: [],
-  custom_validators: []
-}
+JSONEditor.defaults = defaults
+JSONEditor.plugins = plugins
 JSONEditor.Validator = Validator
 
 export default JSONEditor

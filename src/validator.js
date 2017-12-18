@@ -102,7 +102,7 @@ export default Class.extend({
     // `oneOf`
     if (schema.oneOf) {
       valid = 0
-      let oneof_errors = []
+      let oneofErrors = []
       for (i = 0; i < schema.oneOf.length; i++) {
         // Set the error paths to be path.oneOf[i].rest.of.path
         let tmp = this._validateSchema(schema.oneOf[i], value, path)
@@ -113,7 +113,7 @@ export default Class.extend({
         for (j = 0; j < tmp.length; j++) {
           tmp[j].path = path + '.oneOf[' + i + ']' + tmp[j].path.substr(path.length)
         }
-        oneof_errors = oneof_errors.concat(tmp)
+        oneofErrors = oneofErrors.concat(tmp)
       }
       if (valid !== 1) {
         errors.push({
@@ -121,7 +121,7 @@ export default Class.extend({
           property: 'oneOf',
           message: this.translate('error_oneOf', [valid])
         })
-        errors = errors.concat(oneof_errors)
+        errors = errors.concat(oneofErrors)
       }
     }
 

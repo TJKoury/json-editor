@@ -25,6 +25,7 @@
     "build": "node build/build.js"
   },
   "dependencies": {
+    "lz-string": "^1.4.4",
     "vue": "^2.5.2"
   },
   "devDependencies": {

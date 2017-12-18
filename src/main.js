@@ -10,5 +10,7 @@
  */
 
 import _core from './core'
+import LZString from 'lz-string'
 
-console.log(_core)
+window.LZString = LZString
+window.JSONEditor = _core
