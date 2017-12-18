@@ -1,3 +1,5 @@
+import { $each, $trigger, $extend } from './../utilities'
+
 export default {
   register: function () {
     this._super()
@@ -19,11 +21,11 @@ export default {
     return Math.max(Math.min(12, this.width), 3)
   },
   preBuild: function () {
-    var item_schema = this.jsoneditor.expandRefs(this.schema.items || {})
+    var itemSchema = this.jsoneditor.expandRefs(this.schema.items || {})
 
-    this.item_title = item_schema.title || 'row'
-    this.item_default = item_schema['default'] || null
-    this.item_has_child_editors = item_schema.properties || item_schema.items
+    this.item_title = itemSchema.title || 'row'
+    this.item_default = itemSchema['default'] || null
+    this.item_has_child_editors = itemSchema.properties || itemSchema.items
     this.width = 12
     this._super()
   },
@@ -98,8 +100,8 @@ export default {
     return this.item_title
   },
   getElementEditor: function (i, ignore) {
-    var schema_copy = $extend({}, this.schema.items)
-    var editor = this.jsoneditor.getEditorClass(schema_copy, this.jsoneditor)
+    var schemaCopy = $extend({}, this.schema.items)
+    var editor = this.jsoneditor.getEditorClass(schemaCopy, this.jsoneditor)
     var row = this.row_holder.appendChild(this.theme.getTableRow())
     var holder = row
     if (!this.item_has_child_editors) {
@@ -109,7 +111,7 @@ export default {
 
     var ret = this.jsoneditor.createEditor(editor, {
       jsoneditor: this.jsoneditor,
-      schema: schema_copy,
+      schema: schemaCopy,
       container: holder,
       path: this.path + '.' + i,
       parent: this,
@@ -161,7 +163,7 @@ export default {
     var serialized = JSON.stringify(value)
     if (serialized === this.serialized) return
 
-    var numrows_changed = false
+    var numrowsChanged = false
 
     var self = this
     $each(value, function (i, val) {
@@ -170,7 +172,7 @@ export default {
         self.rows[i].setValue(val)
       } else {
         self.addRow(val)
-        numrows_changed = true
+        numrowsChanged = true
       }
     })
 
@@ -182,12 +184,12 @@ export default {
       self.rows[j].destroy()
       if (holder.parentNode) holder.parentNode.removeChild(holder)
       self.rows[j] = null
-      numrows_changed = true
+      numrowsChanged = true
     }
     self.rows = self.rows.slice(0, value.length)
 
     self.refreshValue()
-    if (numrows_changed || initial) self.refreshRowButtons()
+    if (numrowsChanged || initial) self.refreshRowButtons()
 
     self.onChange()
 
@@ -199,14 +201,14 @@ export default {
     // If we currently have minItems items in the array
     var minItems = this.schema.minItems && this.schema.minItems >= this.rows.length
 
-    var need_row_buttons = false
+    var needRowButtons = false
     $each(this.rows, function (i, editor) {
       // Hide the move down button for the last row
       if (editor.movedown_button) {
         if (i === self.rows.length - 1) {
           editor.movedown_button.style.display = 'none'
         } else {
-          need_row_buttons = true
+          needRowButtons = true
           editor.movedown_button.style.display = ''
         }
       }
@@ -216,31 +218,31 @@ export default {
         if (minItems) {
           editor.delete_button.style.display = 'none'
         } else {
-          need_row_buttons = true
+          needRowButtons = true
           editor.delete_button.style.display = ''
         }
       }
 
       if (editor.moveup_button) {
-        need_row_buttons = true
+        needRowButtons = true
       }
     })
 
     // Show/hide controls column in table
     $each(this.rows, function (i, editor) {
-      if (need_row_buttons) {
+      if (needRowButtons) {
         editor.controls_cell.style.display = ''
       } else {
         editor.controls_cell.style.display = 'none'
       }
     })
-    if (need_row_buttons) {
+    if (needRowButtons) {
       this.controls_header_cell.style.display = ''
     } else {
       this.controls_header_cell.style.display = 'none'
     }
 
-    var controls_needed = false
+    var controlsNeeded = false
 
     if (!this.value.length) {
       this.delete_last_row_button.style.display = 'none'
@@ -255,7 +257,7 @@ export default {
         this.delete_last_row_button.style.display = 'none'
       } else {
         this.delete_last_row_button.style.display = ''
-        controls_needed = true
+        controlsNeeded = true
       }
     } else {
       this.table.style.display = ''
@@ -264,14 +266,14 @@ export default {
         this.delete_last_row_button.style.display = 'none'
       } else {
         this.delete_last_row_button.style.display = ''
-        controls_needed = true
+        controlsNeeded = true
       }
 
       if (minItems || this.hide_delete_all_rows_buttons) {
         this.remove_all_rows_button.style.display = 'none'
       } else {
         this.remove_all_rows_button.style.display = ''
-        controls_needed = true
+        controlsNeeded = true
       }
     }
 
@@ -280,10 +282,10 @@ export default {
       this.add_row_button.style.display = 'none'
     } else {
       this.add_row_button.style.display = ''
-      controls_needed = true
+      controlsNeeded = true
     }
 
-    if (!controls_needed) {
+    if (!controlsNeeded) {
       this.controls.style.display = 'none'
     } else {
       this.controls.style.display = ''
@@ -305,7 +307,7 @@ export default {
 
     self.rows[i] = this.getElementEditor(i)
 
-    var controls_holder = self.rows[i].table_controls
+    var controlsHolder = self.rows[i].table_controls
 
     // Buttons to delete row, move row up, and move row down
     if (!this.hide_delete_buttons) {
@@ -327,7 +329,7 @@ export default {
         self.setValue(newval)
         self.onChange(true)
       })
-      controls_holder.appendChild(self.rows[i].delete_button)
+      controlsHolder.appendChild(self.rows[i].delete_button)
     }
 
     if (i && !this.hide_move_buttons) {
@@ -348,7 +350,7 @@ export default {
         self.setValue(rows)
         self.onChange(true)
       })
-      controls_holder.appendChild(self.rows[i].moveup_button)
+      controlsHolder.appendChild(self.rows[i].moveup_button)
     }
 
     if (!this.hide_move_buttons) {
@@ -368,7 +370,7 @@ export default {
         self.setValue(rows)
         self.onChange(true)
       })
-      controls_holder.appendChild(self.rows[i].movedown_button)
+      controlsHolder.appendChild(self.rows[i].movedown_button)
     }
 
     if (value) self.rows[i].setValue(value)

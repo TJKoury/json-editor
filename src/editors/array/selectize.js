@@ -1,3 +1,5 @@
+import { $each } from './../../utilities'
+
 export default {
   build: function () {
     this.title = this.theme.getFormInputLabel(this.getTitle())
@@ -63,28 +65,26 @@ export default {
     var self = this
 
     // Get all the errors that pertain to this editor
-    var my_errors = []
-    var other_errors = []
+    var myErrors = []
+    var otherErrors = []
     $each(errors, function (i, error) {
       if (error.path === self.path) {
-        my_errors.push(error)
+        myErrors.push(error)
       } else {
-        other_errors.push(error)
+        otherErrors.push(error)
       }
     })
 
     // Show errors for this editor
     if (this.error_holder) {
-      if (my_errors.length) {
-        var message = []
+      if (myErrors.length) {
         this.error_holder.innerHTML = ''
         this.error_holder.style.display = ''
-        $each(my_errors, function (i, error) {
+        $each(myErrors, function (i, error) {
           self.error_holder.appendChild(self.theme.getErrorMessage(error.message))
         })
-      }
-      // Hide error area
-      else {
+      } else {
+        // Hide error area
         this.error_holder.style.display = 'none'
       }
     }

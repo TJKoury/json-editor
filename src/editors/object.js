@@ -1,3 +1,5 @@
+import { $each, $trigger, $extend } from './../utilities'
+
 export default {
   getDefault: function () {
     return $extend({}, this.schema['default'] || {})
@@ -52,7 +54,9 @@ export default {
     }
   },
   layoutEditors: function () {
-    var self = this, i, j
+    var self = this
+    var i
+    var j
 
     if (!this.row_container) return
 
@@ -118,15 +122,15 @@ export default {
       for (i = 0; i < rows.length; i++) {
         if (rows[i].width < 12) {
           var biggest = false
-          var new_width = 0
+          var newWidth = 0
           for (j = 0; j < rows[i].editors.length; j++) {
             if (biggest === false) biggest = j
             else if (rows[i].editors[j].width > rows[i].editors[biggest].width) biggest = j
             rows[i].editors[j].width *= 12 / rows[i].width
             rows[i].editors[j].width = Math.floor(rows[i].editors[j].width)
-            new_width += rows[i].editors[j].width
+            newWidth += rows[i].editors[j].width
           }
-          if (new_width < 12) rows[i].editors[biggest].width += 12 - new_width
+          if (newWidth < 12) rows[i].editors[biggest].width += 12 - newWidth
           rows[i].width = 12
         }
       }
@@ -149,9 +153,8 @@ export default {
           row.appendChild(editor.container)
         }
       }
-    }
-    // Normal layout
-    else {
+    } else {
+      // Normal layout
       container = document.createElement('div')
       $each(this.property_order, function (i, key) {
         var editor = self.editors[key]
@@ -227,19 +230,17 @@ export default {
         self.maxwidth += width
       })
       this.no_link_holder = true
-    }
-    // If the object should be rendered as a table
-    else if (this.options.table) {
+    } else if (this.options.table) {
+      // If the object should be rendered as a table
       // TODO: table display format
-      throw 'Not supported yet'
-    }
-    // If the object should be rendered as a div
-    else {
+      throw Error('Not supported yet')
+    } else {
+      // If the object should be rendered as a div
       if (!this.schema.defaultProperties) {
         if (this.jsoneditor.options.display_required_only || this.options.display_required_only) {
           this.schema.defaultProperties = []
           $each(this.schema.properties, function (k, s) {
-            if (self.isRequired({key: k, schema: s})) {
+            if (self.isRequired({ key: k, schema: s })) {
               self.schema.defaultProperties.push(k)
             }
           })
@@ -293,14 +294,12 @@ export default {
           holder.style.width = self.editors[key].options.input_width
         }
       })
-    }
-    // If the object should be rendered as a table
-    else if (this.options.table) {
+    } else if (this.options.table) {
+      // If the object should be rendered as a table
       // TODO: table display format
-      throw 'Not supported yet'
-    }
-    // If the object should be rendered as a div
-    else {
+      throw Error('Not supported yet')
+    } else {
+      // If the object should be rendered as a div
       this.header = document.createElement('span')
       this.header.textContent = this.getTitle()
       this.title = this.theme.getHeader(this.header)
@@ -468,9 +467,8 @@ export default {
       $each(this.property_order, function (i, key) {
         self.editor_holder.appendChild(self.editors[key].container)
       })
-    }
-    // Layout object editors in grid if needed
-    else {
+    } else {
+      // Layout object editors in grid if needed
       // Initial layout
       this.layoutEditors()
       // Do it again now that we know the approximate heights of elements
@@ -513,7 +511,7 @@ export default {
       this.hideEditJSON()
     } catch (e) {
       window.alert('invalid JSON')
-      throw e
+      throw Error(e)
     }
   },
   toggleEditJSON: function () {
@@ -540,7 +538,10 @@ export default {
   },
   addPropertyCheckbox: function (key) {
     var self = this
-    var checkbox, label, labelText, control
+    var checkbox
+    var label
+    var labelText
+    var control
 
     checkbox = self.theme.getCheckbox()
     checkbox.style.width = 'auto'
@@ -608,7 +609,7 @@ export default {
       this.layoutEditors()
     }
   },
-  addObjectProperty: function (name, prebuild_only) {
+  addObjectProperty: function (name, prebuildOnly) {
     var self = this
 
     // Property is already added
@@ -617,11 +618,10 @@ export default {
     // Property was added before and is cached
     if (this.cached_editors[name]) {
       this.editors[name] = this.cached_editors[name]
-      if (prebuild_only) return
+      if (prebuildOnly) return
       this.editors[name].register()
-    }
-    // New property
-    else {
+    } else {
+      // New property
       if (!this.canHaveAdditionalProperties() && (!this.schema.properties || !this.schema.properties[name])) {
         return
       }
@@ -639,7 +639,7 @@ export default {
       })
       self.editors[name].preBuild()
 
-      if (!prebuild_only) {
+      if (!prebuildOnly) {
         var holder = self.theme.getChildEditorHolder()
         self.editor_holder.appendChild(holder)
         self.editors[name].setContainer(holder)
@@ -651,7 +651,7 @@ export default {
     }
 
     // If we're only prebuilding the editors, don't refresh values
-    if (!prebuild_only) {
+    if (!prebuildOnly) {
       self.refreshValue()
       self.layoutEditors()
     }
@@ -694,7 +694,6 @@ export default {
   },
   refreshValue: function () {
     this.value = {}
-    var self = this
 
     for (var i in this.editors) {
       if (!this.editors.hasOwnProperty(i)) continue
@@ -709,16 +708,19 @@ export default {
       return
     }
 
-    var can_add = false, can_remove = false, num_props = 0, i, show_modal = false
+    var canAdd = false
+    // var canRemove = false
+    var numProps = 0
+    var i
+    var showModal = false
 
-    // Get number of editors
     for (i in this.editors) {
       if (!this.editors.hasOwnProperty(i)) continue
-      num_props++
+      numProps++
     }
 
     // Determine if we can add back removed properties
-    can_add = this.canHaveAdditionalProperties() && !(typeof this.schema.maxProperties !== 'undefined' && num_props >= this.schema.maxProperties)
+    canAdd = this.canHaveAdditionalProperties() && !(typeof this.schema.maxProperties !== 'undefined' && numProps >= this.schema.maxProperties)
 
     if (this.addproperty_checkboxes) {
       this.addproperty_list.innerHTML = ''
@@ -735,50 +737,47 @@ export default {
         this.addproperty_checkboxes[i].disabled = true
       }
 
-      if (typeof this.schema.minProperties !== 'undefined' && num_props <= this.schema.minProperties) {
+      if (typeof this.schema.minProperties !== 'undefined' && numProps <= this.schema.minProperties) {
         this.addproperty_checkboxes[i].disabled = this.addproperty_checkboxes[i].checked
-        if (!this.addproperty_checkboxes[i].checked) show_modal = true
+        if (!this.addproperty_checkboxes[i].checked) showModal = true
       } else if (!(i in this.editors)) {
-        if (!can_add && !this.schema.properties.hasOwnProperty(i)) {
+        if (!canAdd && !this.schema.properties.hasOwnProperty(i)) {
           this.addproperty_checkboxes[i].disabled = true
         } else {
           this.addproperty_checkboxes[i].disabled = false
-          show_modal = true
+          showModal = true
         }
       } else {
-        show_modal = true
-        can_remove = true
+        showModal = true
+        // canRemove = true
       }
     }
 
     if (this.canHaveAdditionalProperties()) {
-      show_modal = true
+      showModal = true
     }
 
     // Additional addproperty checkboxes not tied to a current editor
     for (i in this.schema.properties) {
       if (!this.schema.properties.hasOwnProperty(i)) continue
       if (this.cached_editors[i]) continue
-      show_modal = true
+      showModal = true
       this.addPropertyCheckbox(i)
     }
 
     // If no editors can be added or removed, hide the modal button
-    if (!show_modal) {
+    if (!showModal) {
       this.hideAddProperty()
       this.addproperty_controls.style.display = 'none'
-    }
-    // If additional properties are disabled
-    else if (!this.canHaveAdditionalProperties()) {
+    } else if (!this.canHaveAdditionalProperties()) {
+      // If additional properties are disabled
       this.addproperty_add.style.display = 'none'
       this.addproperty_input.style.display = 'none'
-    }
-    // If no new properties can be added
-    else if (!can_add) {
+    } else if (!canAdd) {
+      // If no new properties can be added
       this.addproperty_add.disabled = true
-    }
-    // If new properties can be added
-    else {
+    } else {
+      // If new properties can be added
       this.addproperty_add.disabled = false
     }
   },
@@ -800,13 +799,11 @@ export default {
       if (typeof value[i] !== 'undefined') {
         self.addObjectProperty(i)
         editor.setValue(value[i], initial)
-      }
-      // Otherwise, remove value unless this is the initial set or it's required
-      else if (!initial && !self.isRequired(editor)) {
+      } else if (!initial && !self.isRequired(editor)) {
+        // Otherwise, remove value unless this is the initial set or it's required
         self.removeObjectProperty(i)
-      }
-      // Otherwise, set the value to the default
-      else {
+      } else {
+        // Otherwise, set the value to the default
         editor.setValue(editor.getDefault(), initial)
       }
     })
@@ -826,35 +823,32 @@ export default {
     var self = this
 
     // Get all the errors that pertain to this editor
-    var my_errors = []
-    var other_errors = []
+    var myErrors = []
+    var otherErrors = []
     $each(errors, function (i, error) {
       if (error.path === self.path) {
-        my_errors.push(error)
+        myErrors.push(error)
       } else {
-        other_errors.push(error)
+        otherErrors.push(error)
       }
     })
 
     // Show errors for this editor
     if (this.error_holder) {
-      if (my_errors.length) {
-        var message = []
+      if (myErrors.length) {
         this.error_holder.innerHTML = ''
         this.error_holder.style.display = ''
-        $each(my_errors, function (i, error) {
+        $each(myErrors, function (i, error) {
           self.error_holder.appendChild(self.theme.getErrorMessage(error.message))
         })
-      }
-      // Hide error area
-      else {
+      } else {
         this.error_holder.style.display = 'none'
       }
     }
 
     // Show error for the table row if this is inside a table
     if (this.options.table_row) {
-      if (my_errors.length) {
+      if (myErrors.length) {
         this.theme.addTableRowError(this.container)
       } else {
         this.theme.removeTableRowError(this.container)
@@ -863,7 +857,7 @@ export default {
 
     // Show errors for child editors
     $each(this.editors, function (i, editor) {
-      editor.showValidationErrors(other_errors)
+      editor.showValidationErrors(otherErrors)
     })
   }
 }

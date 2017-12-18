@@ -12,7 +12,7 @@ export default {
 
     // Don't show uploader if this is readonly
     if (!this.schema.readOnly && !this.schema.readonly) {
-      if (!window.FileReader) throw 'FileReader required for base64 editor'
+      if (!window.FileReader) throw Error('FileReader required for base64 editor')
 
       // File uploader
       this.uploader = this.theme.getFormInputField('file')

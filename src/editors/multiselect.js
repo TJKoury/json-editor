@@ -1,3 +1,5 @@
+import { $extend } from './../utilities'
+
 export default {
   preBuild: function () {
     this._super()
@@ -6,10 +8,10 @@ export default {
     this.select_options = {}
     this.select_values = {}
 
-    var items_schema = this.jsoneditor.expandRefs(this.schema.items || {})
+    var itemsSchema = this.jsoneditor.expandRefs(this.schema.items || {})
 
-    var e = items_schema['enum'] || []
-    var t = items_schema.options ? items_schema.options.enum_titles || [] : []
+    var e = itemsSchema['enum'] || []
+    var t = itemsSchema.options ? itemsSchema.options.enum_titles || [] : []
     this.option_keys = []
     this.option_titles = []
     for (i = 0; i < e.length; i++) {
@@ -22,7 +24,8 @@ export default {
     }
   },
   build: function () {
-    var self = this, i
+    var self = this
+    var i
     if (!this.options.compact) this.header = this.label = this.theme.getFormInputLabel(this.getTitle())
     if (this.schema.description) this.description = this.theme.getFormInputDescription(this.schema.description)
 
@@ -63,12 +66,12 @@ export default {
       e.preventDefault()
       e.stopPropagation()
 
-      var new_value = []
+      var newValue = []
       for (i = 0; i < self.option_keys.length; i++) {
-        if (self.select_options[self.option_keys[i]].selected || self.select_options[self.option_keys[i]].checked) new_value.push(self.select_values[self.option_keys[i]])
+        if (self.select_options[self.option_keys[i]].selected || self.select_options[self.option_keys[i]].checked) newValue.push(self.select_values[self.option_keys[i]])
       }
 
-      self.updateValue(new_value)
+      self.updateValue(newValue)
       self.onChange(true)
     })
   },
@@ -95,7 +98,7 @@ export default {
   },
   setupSelect2: function () {
     if (window.jQuery && window.jQuery.fn && window.jQuery.fn.select2) {
-      var options = window.jQuery.extend({}, JSONEditor.plugins.select2)
+      var options = window.jQuery.extend({}, this.jsoneditor.plugins.select2)
       if (this.schema.options && this.schema.options.select2_options) options = $extend(options, this.schema.options.select2_options)
       this.select2 = window.jQuery(this.input).select2(options)
       var self = this
@@ -127,27 +130,27 @@ export default {
     this.input.removeAttribute('name')
   },
   getNumColumns: function () {
-    var longest_text = this.getTitle().length
+    var longestText = this.getTitle().length
     for (var i in this.select_values) {
       if (!this.select_values.hasOwnProperty(i)) continue
-      longest_text = Math.max(longest_text, (this.select_values[i] + '').length + 4)
+      longestText = Math.max(longestText, (this.select_values[i] + '').length + 4)
     }
 
-    return Math.min(12, Math.max(longest_text / 7, 2))
+    return Math.min(12, Math.max(longestText / 7, 2))
   },
   updateValue: function (value) {
     var changed = false
-    var new_value = []
+    var newValue = []
     for (var i = 0; i < value.length; i++) {
       if (!this.select_options[value[i] + '']) {
         changed = true
         continue
       }
       var sanitized = this.sanitize(this.select_values[value[i]])
-      new_value.push(sanitized)
+      newValue.push(sanitized)
       if (sanitized !== value[i]) changed = true
     }
-    this.value = new_value
+    this.value = newValue
     if (this.select2) this.select2.select2('val', this.value)
     return changed
   },

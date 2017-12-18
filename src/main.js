@@ -31,12 +31,13 @@ let _editors = ['arraySelectize',
   'selectize',
   'string',
   'table',
-  'upload'].forEach(editor => {
-    if (editor === 'arraySelectize') {
-      window.JSONEditor.addEditor(editor, require('./editors/array/selectize.js'))
-    } else {
-      window.JSONEditor.addEditor(editor, require('./editors/' + editor + '.js'))
-    }
-  })
+  'upload']
+_editors.forEach(editor => {
+  if (editor === 'arraySelectize') {
+    window.JSONEditor.addEditor(editor, require('./editors/array/selectize.js'))
+  } else {
+    window.JSONEditor.addEditor(editor, require('./editors/' + editor + '.js'))
+  }
+})
 
 window.LZString = LZString

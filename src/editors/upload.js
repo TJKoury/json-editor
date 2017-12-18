@@ -12,7 +12,7 @@ export default {
 
     // Don't show uploader if this is readonly
     if (!this.schema.readOnly && !this.schema.readonly) {
-      if (!this.jsoneditor.options.upload) throw 'Upload handler required for upload editor'
+      if (!this.jsoneditor.options.upload) throw Error('Upload handler required for upload editor')
 
       // File uploader
       this.uploader = this.theme.getFormInputField('file')

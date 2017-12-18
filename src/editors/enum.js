@@ -1,10 +1,11 @@
+import { $each } from './../utilities'
+
 // Enum Editor (used for objects and arrays with enumerated values)
 export default {
   getNumColumns: function () {
     return 4
   },
   build: function () {
-    var container = this.container
     this.title = this.header = this.label = this.theme.getFormInputLabel(this.getTitle())
     this.container.appendChild(this.title)
 
@@ -74,9 +75,8 @@ export default {
 
     if (el === null) {
       return '<em>null</em>'
-    }
-    // Array or Object
-    else if (typeof el === 'object') {
+    } else if (typeof el === 'object') {
+      // Array or Object
       // TODO: use theme
       var ret = ''
 
@@ -97,17 +97,14 @@ export default {
       else ret = "<ul style='margin-top:0;margin-bottom:0;padding-top:0;padding-bottom:0;'>" + ret + '</ul>'
 
       return ret
-    }
-    // Boolean
-    else if (typeof el === 'boolean') {
+    } else if (typeof el === 'boolean') {
+      // Boolean
       return el ? 'true' : 'false'
-    }
-    // String
-    else if (typeof el === 'string') {
+    } else if (typeof el === 'string') {
+      // String
       return el.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-    }
-    // Number
-    else {
+    } else {
+      // Number
       return el
     }
   },
