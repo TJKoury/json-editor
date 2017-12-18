@@ -1,3 +1,5 @@
+import { $each, $extend } from './../utilities'
+
 export default {
   register: function () {
     this._super()
@@ -9,10 +11,8 @@ export default {
     if (!this.input) return
     this.input.removeAttribute('name')
   },
-  setValue: function (value, initial, from_template) {
-    var self = this
-
-    if (this.template && !from_template) {
+  setValue: function (value, initial, fromTemplate) {
+    if (this.template && !fromTemplate) {
       return
     }
 
@@ -40,7 +40,7 @@ export default {
       this.ace_editor.setValue(sanitized)
     }
 
-    var changed = from_template || this.getValue() !== value
+    var changed = fromTemplate || this.getValue() !== value
 
     this.refreshValue()
 
@@ -63,7 +63,8 @@ export default {
     return Math.min(12, Math.max(min, num))
   },
   build: function () {
-    var self = this, i
+    var self = this
+
     if (!this.options.compact) this.header = this.label = this.theme.getFormInputLabel(this.getTitle())
     if (this.schema.description) this.description = this.theme.getFormInputDescription(this.schema.description)
 
@@ -84,9 +85,8 @@ export default {
       if (this.format === 'textarea') {
         this.input_type = 'textarea'
         this.input = this.theme.getTextareaInput()
-      }
-      // Range Input
-      else if (this.format === 'range') {
+      } else if (this.format === 'range') {
+        // Range Input
         this.input_type = 'range'
         var min = this.schema.minimum || 0
         var max = this.schema.maximum || Math.max(100, min + 1)
@@ -98,9 +98,7 @@ export default {
         }
 
         this.input = this.theme.getRangeInput(min, max, step)
-      }
-      // Source Code
-      else if ([
+      } else if ([
         'actionscript',
         'batchfile',
         'bbcode',
@@ -153,19 +151,18 @@ export default {
         'yaml'
       ].indexOf(this.format) >= 0
       ) {
+        // Source Code
         this.input_type = this.format
         this.source_code = true
 
         this.input = this.theme.getTextareaInput()
-      }
-      // HTML5 Input type
-      else {
+      } else {
+        // HTML5 Input type
         this.input_type = this.format
         this.input = this.theme.getFormInputField(this.input_type)
       }
-    }
-    // Normal text input
-    else {
+    } else {
+      // Normal text input
       this.input_type = 'text'
       this.input = this.theme.getFormInputField(this.input_type)
     }
@@ -215,7 +212,8 @@ export default {
     if (this.options.expand_height) {
       this.adjust_height = function (el) {
         if (!el) return
-        var i, ch = el.offsetHeight
+        var i
+        var ch = el.offsetHeight
         // Input too short
         if (el.offsetHeight < el.scrollHeight) {
           i = 0
@@ -281,7 +279,8 @@ export default {
     this._super()
   },
   afterInputReady: function () {
-    var self = this, options
+    var self = this
+    var options
 
     // Code editor
     if (this.source_code) {
@@ -295,7 +294,7 @@ export default {
           emoticonsEnabled: false,
           width: '100%',
           height: 300
-        }, JSONEditor.plugins.sceditor, self.options.sceditor_options || {})
+        }, this.jsoneditor.plugins.sceditor, self.options.sceditor_options || {})
 
         window.jQuery(self.input).sceditor(options)
 
@@ -312,14 +311,13 @@ export default {
           self.is_dirty = true
           self.onChange(true)
         })
-      }
-      // EpicEditor for markdown (if it's loaded)
-      else if (this.input_type === 'markdown' && window.EpicEditor) {
+      } else if (this.input_type === 'markdown' && window.EpicEditor) {
+        // EpicEditor for markdown (if it's loaded)
         this.epiceditor_container = document.createElement('div')
         this.input.parentNode.insertBefore(this.epiceditor_container, this.input)
         this.input.style.display = 'none'
 
-        options = $extend({}, JSONEditor.plugins.epiceditor, {
+        options = $extend({}, this.jsoneditor.plugins.epiceditor, {
           container: this.epiceditor_container,
           clientSideStorage: false
         })
@@ -335,9 +333,8 @@ export default {
           self.is_dirty = true
           self.onChange(true)
         })
-      }
-      // ACE editor for everything else
-      else if (window.ace) {
+      } else if (window.ace) {
+        // ACE editor for everything else
         var mode = this.input_type
         // aliases for c/cpp
         if (mode === 'cpp' || mode === 'c++' || mode === 'c') {
@@ -355,7 +352,7 @@ export default {
         this.ace_editor.setValue(this.getValue())
 
         // The theme
-        if (JSONEditor.plugins.ace.theme) this.ace_editor.setTheme('ace/theme/' + JSONEditor.plugins.ace.theme)
+        if (this.jsoneditor.plugins.ace.theme) this.ace_editor.setTheme('ace/theme/' + this.jsoneditor.plugins.ace.theme)
         // The mode
         mode = window.ace.require('ace/mode/' + mode)
         if (mode) this.ace_editor.getSession().setMode(new mode.Mode())
@@ -405,7 +402,7 @@ export default {
    * Re-calculates the value if needed
    */
   onWatchedFieldChange: function () {
-    var self = this, vars, j
+    var vars
 
     // If this editor needs to be rendered by a macro template
     if (this.template) {

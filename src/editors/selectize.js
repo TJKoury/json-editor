@@ -201,14 +201,14 @@ export default {
     // If this editor uses a dynamic select box
     if (this.enumSource) {
       vars = this.getWatchedFieldValues()
-      var select_options = []
-      var select_titles = []
+      var selectOptions = []
+      var selectTitles = []
 
       for (var i = 0; i < this.enumSource.length; i++) {
         // Constant values
         if (Array.isArray(this.enumSource[i])) {
-          select_options = select_options.concat(this.enumSource[i])
-          select_titles = select_titles.concat(this.enumSource[i])
+          selectOptions = selectOptions.concat(this.enumSource[i])
+          selectTitles = selectTitles.concat(this.enumSource[i])
         }
         // A watched field
         else if (vars[this.enumSource[i].source]) {
@@ -250,37 +250,34 @@ export default {
                 i: j,
                 item: item
               })
-            }
-            // Use value as the title also
-            else {
+            } else {
+              // Use value as the title also
               item_titles[j] = item_values[j]
             }
           }
 
           // TODO: sort
 
-          select_options = select_options.concat(item_values)
-          select_titles = select_titles.concat(item_titles)
+          selectOptions = selectOptions.concat(item_values)
+          selectTitles = selectTitles.concat(item_titles)
         }
       }
 
-      var prev_value = this.value
+      var prevValue = this.value
 
-      this.theme.setSelectOptions(this.input, select_options, select_titles)
-      this.enum_options = select_options
-      this.enum_display = select_titles
-      this.enum_values = select_options
+      this.theme.setSelectOptions(this.input, selectOptions, selectTitles)
+      this.enum_options = selectOptions
+      this.enum_display = selectTitles
+      this.enum_values = selectOptions
 
       // If the previous value is still in the new select options, stick with it
-      if (select_options.indexOf(prev_value) !== -1) {
-        this.input.value = prev_value
-        this.value = prev_value
-      }
-
-      // Otherwise, set the value to the first select option
-      else {
-        this.input.value = select_options[0]
-        this.value = select_options[0] || ''
+      if (selectOptions.indexOf(prevValue) !== -1) {
+        this.input.value = prevValue
+        this.value = prevValue
+      } else {
+        // Otherwise, set the value to the first select option
+        this.input.value = selectOptions[0]
+        this.value = selectOptions[0] || ''
         if (this.parent) this.parent.onChildEditorChange(this)
         else this.jsoneditor.onChange()
         this.jsoneditor.notifyWatchers(this.path)
@@ -288,7 +285,7 @@ export default {
 
       if (this.selectize) {
         // Update the Selectize options
-        this.updateSelectizeOptions(select_options)
+        this.updateSelectizeOptions(selectOptions)
       } else {
         this.setupSelectize()
       }
@@ -296,14 +293,14 @@ export default {
       this._super()
     }
   },
-  updateSelectizeOptions: function (select_options) {
-    var selectized = this.selectize[0].selectize,
-      self = this
+  updateSelectizeOptions: function (selectOptions) {
+    var selectized = this.selectize[0].selectize
+    var self = this
 
     selectized.off()
     selectized.clearOptions()
-    for (var n in select_options) {
-      selectized.addOption({value: select_options[n], text: select_options[n]})
+    for (var n in selectOptions) {
+      selectized.addOption({value: selectOptions[n], text: selectOptions[n]})
     }
     selectized.addItem(this.value)
     selectized.on('change', function () {

@@ -1,3 +1,5 @@
+import { $each, $extend } from './../utilities'
+
 // Multiple Editor (for when `type` is an array)
 export default {
   register: function () {
@@ -50,7 +52,7 @@ export default {
       this.buildChildEditor(i)
     }
 
-    var current_value = self.getValue()
+    var currentValue = self.getValue()
 
     self.type = i
 
@@ -59,7 +61,7 @@ export default {
     $each(self.editors, function (type, editor) {
       if (!editor) return
       if (self.type === type) {
-        if (self.keep_values) editor.setValue(current_value, true)
+        if (self.keep_values) editor.setValue(currentValue, true)
         editor.container.style.display = ''
       } else editor.container.style.display = 'none'
     })
@@ -112,8 +114,6 @@ export default {
     if (i !== self.type) holder.style.display = 'none'
   },
   preBuild: function () {
-    var self = this
-
     this.types = []
     this.type = 0
     this.editors = []
@@ -141,11 +141,11 @@ export default {
           if (typeof disallow !== 'object' || !(Array.isArray(disallow))) {
             disallow = [disallow]
           }
-          var allowed_types = []
+          var allowedTypes = []
           $each(this.types, function (i, type) {
-            if (disallow.indexOf(type) === -1) allowed_types.push(type)
+            if (disallow.indexOf(type) === -1) allowedTypes.push(type)
           })
-          this.types = allowed_types
+          this.types = allowedTypes
         }
       } else if (Array.isArray(this.schema.type)) {
         this.types = this.schema.type
@@ -155,7 +155,7 @@ export default {
       delete this.schema.type
     }
 
-    this.display_text = this.getDisplayText(this.types)
+    this.displayText = this.getDisplayText(this.types)
   },
   build: function () {
     var self = this
@@ -164,22 +164,22 @@ export default {
     this.header = this.label = this.theme.getFormInputLabel(this.getTitle())
     this.container.appendChild(this.header)
 
-    this.switcher = this.theme.getSwitcher(this.display_text)
+    this.switcher = this.theme.getSwitcher(this.displayText)
     container.appendChild(this.switcher)
     this.switcher.addEventListener('change', function (e) {
       e.preventDefault()
       e.stopPropagation()
 
-      self.switchEditor(self.display_text.indexOf(this.value))
+      self.switchEditor(self.displayText.indexOf(this.value))
       self.onChange(true)
     })
 
     this.editor_holder = document.createElement('div')
     container.appendChild(this.editor_holder)
 
-    var validator_options = {}
+    var validatorOptions = {}
     if (self.jsoneditor.options.custom_validators) {
-      validator_options.custom_validators = self.jsoneditor.options.custom_validators
+      validatorOptions.custom_validators = self.jsoneditor.options.custom_validators
     }
 
     this.switcher_options = this.theme.getSwitcherOptions(this.switcher)
@@ -200,7 +200,7 @@ export default {
         }
       }
 
-      self.validators[i] = new JSONEditor.Validator(self.jsoneditor, schema, validator_options)
+      self.validators[i] = new this.jsoneditor.Validator(self.jsoneditor, schema, validatorOptions)
     })
 
     this.switchEditor(0)
@@ -214,9 +214,9 @@ export default {
     this._super()
   },
   refreshHeaderText: function () {
-    var display_text = this.getDisplayText(this.types)
+    var displayText = this.getDisplayText(this.types)
     $each(this.switcher_options, function (i, option) {
-      option.textContent = display_text[i]
+      option.textContent = displayText[i]
     })
   },
   refreshValue: function () {
@@ -228,7 +228,7 @@ export default {
     $each(this.validators, function (i, validator) {
       if (!validator.validate(val).length) {
         self.type = i
-        self.switcher.value = self.display_text[i]
+        self.switcher.value = self.displayText[i]
         return false
       }
     })
@@ -253,20 +253,20 @@ export default {
 
     // oneOf and anyOf error paths need to remove the oneOf[i] part before passing to child editors
     if (this.oneOf || this.anyOf) {
-      var check_part = this.oneOf ? 'oneOf' : 'anyOf'
+      var checkPart = this.oneOf ? 'oneOf' : 'anyOf'
       $each(this.editors, function (i, editor) {
         if (!editor) return
-        var check = self.path + '.' + check_part + '[' + i + ']'
-        var new_errors = []
+        var check = self.path + '.' + checkPart + '[' + i + ']'
+        var newErrors = []
         $each(errors, function (j, error) {
           if (error.path.substr(0, check.length) === check) {
-            var new_error = $extend({}, error)
-            new_error.path = self.path + new_error.path.substr(check.length)
-            new_errors.push(new_error)
+            var newError = $extend({}, error)
+            newError.path = self.path + newError.path.substr(check.length)
+            newErrors.push(newError)
           }
         })
 
-        editor.showValidationErrors(new_errors)
+        editor.showValidationErrors(newErrors)
       })
     } else {
       $each(this.editors, function (type, editor) {
