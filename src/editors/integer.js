@@ -1,9 +1,10 @@
-JSONEditor.defaults.editors.integer = JSONEditor.defaults.editors.number.extend({
-  sanitize: function(value) {
-    value = value + "";
-    return value.replace(/[^0-9\-]/g,'');
+ /* eslint-disable */ 
+export default {
+  sanitize: function (value) {
+    value = value + ''
+    return value.replace(/[^0-9\-]/g, '')
   },
-  getNumColumns: function() {
-    return 2;
+  getNumColumns: function () {
+    return 2
   }
-});
+}

@@ -16,4 +16,27 @@ let _themes = ['barebones', 'bootstrap2', 'bootstrap3', 'foundation', 'html', 'j
 _themes.forEach(theme => {
   window.JSONEditor.addTheme(theme, require('./themes/' + theme + '.js'))
 })
+let _editors = ['arraySelectize',
+  'array',
+  'base64',
+  'checkbox',
+  'enum',
+  'integer',
+  'multiple',
+  'multiselect',
+  'null',
+  'number',
+  'object',
+  'select',
+  'selectize',
+  'string',
+  'table',
+  'upload'].forEach(editor => {
+    if (editor === 'arraySelectize') {
+      window.JSONEditor.addEditor(editor, require('./editors/array/selectize.js'))
+    } else {
+      window.JSONEditor.addEditor(editor, require('./editors/' + editor + '.js'))
+    }
+  })
+
 window.LZString = LZString

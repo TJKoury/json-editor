@@ -547,4 +547,8 @@ JSONEditor.addTheme = function (name, theme) {
   JSONEditor.defaults.themes[name] = JSONEditor.AbstractTheme.extend(theme)
 }
 
+JSONEditor.addEditor = function (name, theme) {
+  JSONEditor.defaults.editors[name] = JSONEditor.AbstractEditor.extend(theme)
+}
+
 export default JSONEditor
