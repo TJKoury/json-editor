@@ -1,11 +1,12 @@
 import Class from './class'
 import {$extend, $each} from './utilities'
-
+import { defaults } from './defaults'
 export default Class.extend({
   init: function (jsoneditor, schema, options) {
     this.jsoneditor = jsoneditor
     this.schema = schema || this.jsoneditor.schema
     this.options = options || {}
+    this.jsoneditor.defaults = defaults
     this.translate = this.jsoneditor.translate || this.jsoneditor.defaults.translate
   },
   validate: function (value) {
@@ -14,7 +15,9 @@ export default Class.extend({
   _validateSchema: function (schema, value, path) {
     let self = this
     let errors = []
-    let valid, i, j
+    let valid
+    let i
+    let j
     let stringified = JSON.stringify(value)
 
     path = path || 'root'

@@ -11,6 +11,9 @@
 
 import _core from './core'
 import LZString from 'lz-string'
-
-window.LZString = LZString
 window.JSONEditor = _core
+let _themes = ['barebones', 'bootstrap2', 'bootstrap3', 'foundation', 'html', 'jqueryui']
+_themes.forEach(theme => {
+  window.JSONEditor.addTheme(theme, require('./themes/' + theme + '.js'))
+})
+window.LZString = LZString

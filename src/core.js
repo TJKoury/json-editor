@@ -1,5 +1,8 @@
 import { $extend, $each } from './utilities'
-import {defaults, plugins} from './defaults'
+import { defaults, plugins } from './defaults'
+import { AbstractTheme } from './theme'
+import AbstractIconLib from './iconlib'
+import initJQuery from './jquery'
 import Validator from './validator'
 
 let JSONEditor = function (element, options) {
@@ -17,6 +20,9 @@ JSONEditor.prototype = {
   constructor: JSONEditor,
   init: function () {
     let self = this
+    self.plugins = plugins
+    self.AbstractIconLib = AbstractIconLib
+    self.defaults = defaults
 
     this.ready = false
 
@@ -47,7 +53,7 @@ JSONEditor.prototype = {
         validatorOptions.custom_validators = self.options.custom_validators
       }
 
-      self.validator = new JSONEditor.Validator(self, null, validatorOptions)
+      self.validator = new Validator(self, null, validatorOptions)
 
       // Create the root editor
       let EditorClass = self.getEditorClass(self.schema)
@@ -78,6 +84,7 @@ JSONEditor.prototype = {
         self.trigger('change')
       })
     })
+    initJQuery(self)
   },
   getValue: function () {
     if (!this.ready) throw new Error('JSON Editor not ready yet.  Listen for "ready" event before getting the value')
@@ -178,7 +185,6 @@ JSONEditor.prototype = {
         }
       }
     })
-
     if (!classname) throw new Error('Unknown editor for schema ' + JSON.stringify(schema))
     if (!JSONEditor.defaults.editors[classname]) throw new Error('Unknown editor ' + classname)
 
@@ -533,8 +539,12 @@ JSONEditor.prototype = {
     return extended
   }
 }
+
 JSONEditor.defaults = defaults
-JSONEditor.plugins = plugins
-JSONEditor.Validator = Validator
+JSONEditor.AbstractTheme = AbstractTheme
+
+JSONEditor.addTheme = function (name, theme) {
+  JSONEditor.defaults.themes[name] = JSONEditor.AbstractTheme.extend(theme)
+}
 
 export default JSONEditor
