@@ -1,3 +1,5 @@
+import { $each, $extend } from './../utilities'
+
 export default {
   setValue: function (value, initial) {
     value = this.typecast(value || '')
@@ -29,11 +31,11 @@ export default {
   },
   getNumColumns: function () {
     if (!this.enum_options) return 3
-    var longest_text = this.getTitle().length
+    var longestText = this.getTitle().length
     for (var i = 0; i < this.enum_options.length; i++) {
-      longest_text = Math.max(longest_text, this.enum_options[i].length + 4)
+      longestText = Math.max(longestText, this.enum_options[i].length + 4)
     }
-    return Math.min(12, Math.max(longest_text / 7, 2))
+    return Math.min(12, Math.max(longestText / 7, 2))
   },
   typecast: function (value) {
     if (this.schema.type === 'boolean') {
@@ -59,7 +61,7 @@ export default {
 
     // Enum options enumerated
     if (this.schema['enum']) {
-      var display = this.schema.options && this.schema.options.enum_titles || []
+      var display = (this.schema.options && this.schema.options.enum_titles) || []
 
       $each(this.schema['enum'], function (i, option) {
         self.enum_options[i] = '' + option
@@ -72,10 +74,9 @@ export default {
         self.enum_options.unshift('undefined')
         self.enum_values.unshift(undefined)
       }
-    }
-    // Boolean
-    else if (this.schema.type === 'boolean') {
-      self.enum_display = this.schema.options && this.schema.options.enum_titles || ['true', 'false']
+    } else if (this.schema.type === 'boolean') {
+      // Boolean
+      self.enum_display = (this.schema.options && this.schema.options.enum_titles) || ['true', 'false']
       self.enum_options = ['1', '']
       self.enum_values = [true, false]
 
@@ -84,9 +85,8 @@ export default {
         self.enum_options.unshift('undefined')
         self.enum_values.unshift(undefined)
       }
-    }
-    // Dynamic Enum
-    else if (this.schema.enumSource) {
+    } else if (this.schema.enumSource) {
+      // Dynamic Enum
       this.enumSource = []
       this.enum_display = []
       this.enum_options = []
@@ -115,9 +115,8 @@ export default {
             this.enumSource[i] = {
               source: this.schema.enumSource[i]
             }
-          }
-          // Make a copy of the schema
-          else if (!(Array.isArray(this.schema.enumSource[i]))) {
+          } else if (!(Array.isArray(this.schema.enumSource[i]))) {
+            // Make a copy of the schema
             this.enumSource[i] = $extend({}, this.schema.enumSource[i])
           } else {
             this.enumSource[i] = this.schema.enumSource[i]
@@ -138,10 +137,9 @@ export default {
           this.enumSource[i].filter = this.jsoneditor.compileTemplate(this.enumSource[i].filter, this.template_engine)
         }
       }
-    }
-    // Other, not supported
-    else {
-      throw "'select' editor requires the enum property to be set."
+    } else {
+      // Other, not supported
+      throw Error("'select' editor requires the enum property to be set.")
     }
   },
   build: function () {
@@ -173,25 +171,25 @@ export default {
   onInputChange: function () {
     var val = this.input.value
 
-    var new_val
+    var newVal
     // Invalid option, use first option instead
     if (this.enum_options.indexOf(val) === -1) {
-      new_val = this.enum_values[0]
+      newVal = this.enum_values[0]
     } else {
-      new_val = this.enum_values[this.enum_options.indexOf(val)]
+      newVal = this.enum_values[this.enum_options.indexOf(val)]
     }
 
     // If valid hasn't changed
-    if (new_val === this.value) return
+    if (newVal === this.value) return
 
     // Store new value and propogate change event
-    this.value = new_val
+    this.value = newVal
     this.onChange(true)
   },
   setupSelect2: function () {
     // If the Select2 library is loaded use it when we have lots of items
     if (window.jQuery && window.jQuery.fn && window.jQuery.fn.select2 && (this.enum_options.length > 2 || (this.enum_options.length && this.enumSource))) {
-      var options = $extend({}, JSONEditor.plugins.select2)
+      var options = $extend({}, this.jsoneditor.plugins.select2)
       if (this.schema.options && this.schema.options.select2_options) options = $extend(options, this.schema.options.select2_options)
       this.select2 = window.jQuery(this.input).select2(options)
       var self = this
@@ -213,19 +211,20 @@ export default {
     this.setupSelect2()
   },
   onWatchedFieldChange: function () {
-    var self = this, vars, j
+    var vars
+    var j
 
     // If this editor uses a dynamic select box
     if (this.enumSource) {
       vars = this.getWatchedFieldValues()
-      var select_options = []
-      var select_titles = []
+      var selectOptions = []
+      var selectTitles = []
 
       for (var i = 0; i < this.enumSource.length; i++) {
         // Constant values
         if (Array.isArray(this.enumSource[i])) {
-          select_options = select_options.concat(this.enumSource[i])
-          select_titles = select_titles.concat(this.enumSource[i])
+          selectOptions = selectOptions.concat(this.enumSource[i])
+          selectTitles = selectTitles.concat(this.enumSource[i])
         } else {
           var items = []
           // Static list of items
@@ -243,71 +242,68 @@ export default {
             }
             // Filter the items
             if (this.enumSource[i].filter) {
-              var new_items = []
+              var newItems = []
               for (j = 0; j < items.length; j++) {
-                if (this.enumSource[i].filter({i: j, item: items[j], watched: vars})) new_items.push(items[j])
+                if (this.enumSource[i].filter({i: j, item: items[j], watched: vars})) newItems.push(items[j])
               }
-              items = new_items
+              items = newItems
             }
 
-            var item_titles = []
-            var item_values = []
+            var itemTitles = []
+            var itemValues = []
             for (j = 0; j < items.length; j++) {
               var item = items[j]
 
               // Rendered value
               if (this.enumSource[i].value) {
-                item_values[j] = this.enumSource[i].value({
+                itemValues[j] = this.enumSource[i].value({
                   i: j,
                   item: item
                 })
-              }
-              // Use value directly
-              else {
-                item_values[j] = items[j]
+              } else {
+                // Use value directly
+                itemValues[j] = items[j]
               }
 
               // Rendered title
               if (this.enumSource[i].title) {
-                item_titles[j] = this.enumSource[i].title({
+                itemTitles[j] = this.enumSource[i].title({
                   i: j,
                   item: item
                 })
-              }
-              // Use value as the title also
-              else {
-                item_titles[j] = item_values[j]
+              } else {
+                // Use value as the title also
+                itemTitles[j] = itemValues[j]
               }
             }
 
             // TODO: sort
 
-            select_options = select_options.concat(item_values)
-            select_titles = select_titles.concat(item_titles)
+            selectOptions = selectOptions.concat(itemValues)
+            selectTitles = selectTitles.concat(itemTitles)
           }
         }
       }
 
-      var prev_value = this.value
+      var prevValue = this.value
 
-      this.theme.setSelectOptions(this.input, select_options, select_titles)
-      this.enum_options = select_options
-      this.enum_display = select_titles
-      this.enum_values = select_options
+      this.theme.setSelectOptions(this.input, selectOptions, selectTitles)
+      this.enum_options = selectOptions
+      this.enum_display = selectTitles
+      this.enum_values = selectOptions
 
       if (this.select2) {
         this.select2.select2('destroy')
       }
 
       // If the previous value is still in the new select options, stick with it
-      if (select_options.indexOf(prev_value) !== -1) {
-        this.input.value = prev_value
-        this.value = prev_value
-      }
-      // Otherwise, set the value to the first select option
-      else {
-        this.input.value = select_options[0]
-        this.value = select_options[0] || ''
+      if (selectOptions.indexOf(prevValue) !== -1) {
+        this.input.value = prevValue
+        this.value = prevValue
+      } else {
+        // Otherwise, set the value to the first select option
+        this.input.value = selectOptions[0]
+        this.value = selectOptions[0] || ''
         if (this.parent) this.parent.onChildEditorChange(this)
         else this.jsoneditor.onChange()
         this.jsoneditor.notifyWatchers(this.path)

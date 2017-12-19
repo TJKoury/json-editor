@@ -1,6 +1,7 @@
 import { $extend, $each } from './utilities'
 import { defaults, plugins } from './defaults'
 import { AbstractTheme } from './theme'
+import { AbstractEditor } from './editor'
 import AbstractIconLib from './iconlib'
 import initJQuery from './jquery'
 import Validator from './validator'
@@ -57,6 +58,7 @@ JSONEditor.prototype = {
 
       // Create the root editor
       let EditorClass = self.getEditorClass(self.schema)
+
       self.root = self.createEditor(EditorClass, {
         jsoneditor: self,
         schema: self.schema,
@@ -542,13 +544,15 @@ JSONEditor.prototype = {
 
 JSONEditor.defaults = defaults
 JSONEditor.AbstractTheme = AbstractTheme
+JSONEditor.AbstractEditor = AbstractEditor
 
 JSONEditor.addTheme = function (name, theme) {
   JSONEditor.defaults.themes[name] = JSONEditor.AbstractTheme.extend(theme)
 }
 
-JSONEditor.addEditor = function (name, theme) {
-  JSONEditor.defaults.editors[name] = JSONEditor.AbstractEditor.extend(theme)
+JSONEditor.addEditor = function (name, editor) {
+  let self = this
+  self.defaults.editors[name] = self.AbstractEditor.extend(editor)
 }
 
 export default JSONEditor

@@ -1,3 +1,5 @@
+import { $each, $extend } from './../utilities'
+
 export default {
   setValue: function (value, initial) {
     value = this.typecast(value || '')
@@ -33,11 +35,11 @@ export default {
   },
   getNumColumns: function () {
     if (!this.enum_options) return 3
-    var longest_text = this.getTitle().length
+    var longestText = this.getTitle().length
     for (var i = 0; i < this.enum_options.length; i++) {
-      longest_text = Math.max(longest_text, this.enum_options[i].length + 4)
+      longestText = Math.max(longestText, this.enum_options[i].length + 4)
     }
-    return Math.min(12, Math.max(longest_text / 7, 2))
+    return Math.min(12, Math.max(longestText / 7, 2))
   },
   typecast: function (value) {
     if (this.schema.type === 'boolean') {
@@ -63,22 +65,20 @@ export default {
 
     // Enum options enumerated
     if (this.schema.enum) {
-      var display = this.schema.options && this.schema.options.enum_titles || []
+      var display = (this.schema.options && this.schema.options.enum_titles) || []
 
       $each(this.schema.enum, function (i, option) {
         self.enum_options[i] = '' + option
         self.enum_display[i] = '' + (display[i] || option)
         self.enum_values[i] = self.typecast(option)
       })
-    }
-    // Boolean
-    else if (this.schema.type === 'boolean') {
-      self.enum_display = this.schema.options && this.schema.options.enum_titles || ['true', 'false']
+    } else if (this.schema.type === 'boolean') {
+      // Boolean
+      self.enum_display = (this.schema.options && this.schema.options.enum_titles) || ['true', 'false']
       self.enum_options = ['1', '0']
       self.enum_values = [true, false]
-    }
-    // Dynamic Enum
-    else if (this.schema.enumSource) {
+    } else if (this.schema.enumSource) {
+      // Dynamic Enum
       this.enumSource = []
       this.enum_display = []
       this.enum_options = []
@@ -107,9 +107,8 @@ export default {
             this.enumSource[i] = {
               source: this.schema.enumSource[i]
             }
-          }
-          // Make a copy of the schema
-          else if (!(Array.isArray(this.schema.enumSource[i]))) {
+          } else if (!(Array.isArray(this.schema.enumSource[i]))) {
+            // Make a copy of the schema
             this.enumSource[i] = $extend({}, this.schema.enumSource[i])
           } else {
             this.enumSource[i] = this.schema.enumSource[i]
@@ -130,10 +129,9 @@ export default {
           this.enumSource[i].filter = this.jsoneditor.compileTemplate(this.enumSource[i].filter, this.template_engine)
         }
       }
-    }
-    // Other, not supported
-    else {
-      throw "'select' editor requires the enum property to be set."
+    } else {
+      // Other, not supported
+      throw Error("'select' editor requires the enum property to be set.")
     }
   },
   build: function () {
@@ -169,7 +167,7 @@ export default {
     if (this.enum_options.indexOf(val) === -1) {
       sanitized = this.enum_options[0]
     }
-
+    if (sanitized) { }
     this.value = this.enum_values[this.enum_options.indexOf(val)]
     this.onChange(true)
   },
@@ -177,7 +175,7 @@ export default {
     // If the Selectize library is loaded use it when we have lots of items
     var self = this
     if (window.jQuery && window.jQuery.fn && window.jQuery.fn.selectize && (this.enum_options.length >= 2 || (this.enum_options.length && this.enumSource))) {
-      var options = $extend({}, JSONEditor.plugins.selectize)
+      var options = $extend({}, this.jsoneditor.plugins.selectize)
       if (this.schema.options && this.schema.options.selectize_options) options = $extend(options, this.schema.options.selectize_options)
       this.selectize = window.jQuery(this.input).selectize($extend(options,
         {
@@ -196,7 +194,8 @@ export default {
     this.setupSelectize()
   },
   onWatchedFieldChange: function () {
-    var self = this, vars, j
+    var vars
+    var j
 
     // If this editor uses a dynamic select box
     if (this.enumSource) {
@@ -209,9 +208,8 @@ export default {
         if (Array.isArray(this.enumSource[i])) {
           selectOptions = selectOptions.concat(this.enumSource[i])
           selectTitles = selectTitles.concat(this.enumSource[i])
-        }
-        // A watched field
-        else if (vars[this.enumSource[i].source]) {
+        } else if (vars[this.enumSource[i].source]) {
+          // A watched field
           var items = vars[this.enumSource[i].source]
 
           // Only use a predefined part of the array
@@ -220,46 +218,45 @@ export default {
           }
           // Filter the items
           if (this.enumSource[i].filter) {
-            var new_items = []
+            var newItems = []
             for (j = 0; j < items.length; j++) {
-              if (this.enumSource[i].filter({i: j, item: items[j]})) new_items.push(items[j])
+              if (this.enumSource[i].filter({ i: j, item: items[j] })) newItems.push(items[j])
             }
-            items = new_items
+            items = newItems
           }
 
-          var item_titles = []
-          var item_values = []
+          var itemTitles = []
+          var itemValues = []
           for (j = 0; j < items.length; j++) {
             var item = items[j]
 
             // Rendered value
             if (this.enumSource[i].value) {
-              item_values[j] = this.enumSource[i].value({
+              itemValues[j] = this.enumSource[i].value({
                 i: j,
                 item: item
               })
-            }
-            // Use value directly
-            else {
-              item_values[j] = items[j]
+            } else {
+              // Use value directly
+              itemValues[j] = items[j]
             }
 
             // Rendered title
             if (this.enumSource[i].title) {
-              item_titles[j] = this.enumSource[i].title({
+              itemTitles[j] = this.enumSource[i].title({
                 i: j,
                 item: item
               })
             } else {
               // Use value as the title also
-              item_titles[j] = item_values[j]
+              itemTitles[j] = itemValues[j]
             }
           }
 
           // TODO: sort
 
-          selectOptions = selectOptions.concat(item_values)
-          selectTitles = selectTitles.concat(item_titles)
+          selectOptions = selectOptions.concat(itemValues)
+          selectTitles = selectTitles.concat(itemTitles)
         }
       }
 
@@ -300,7 +297,7 @@ export default {
     selectized.off()
     selectized.clearOptions()
     for (var n in selectOptions) {
-      selectized.addOption({value: selectOptions[n], text: selectOptions[n]})
+      selectized.addOption({ value: selectOptions[n], text: selectOptions[n] })
     }
     selectized.addItem(this.value)
     selectized.on('change', function () {
