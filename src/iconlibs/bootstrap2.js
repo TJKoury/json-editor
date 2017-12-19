@@ -1,8 +1,8 @@
-JSONEditor.defaults.iconlibs.bootstrap2 = JSONEditor.AbstractIconLib.extend({
+module.exports = {
   mapping: {
     collapse: 'chevron-down',
     expand: 'chevron-up',
-    "delete": 'trash',
+    'delete': 'trash',
     edit: 'pencil',
     add: 'plus',
     cancel: 'ban-circle',
@@ -11,4 +11,4 @@ JSONEditor.defaults.iconlibs.bootstrap2 = JSONEditor.AbstractIconLib.extend({
     movedown: 'arrow-down'
   },
   icon_prefix: 'icon-'
-});
+}

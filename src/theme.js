@@ -1,4 +1,4 @@
-import Class from './class'
+import { Class } from './class'
 
 var matchKey = (function () {
   var elem = document.documentElement

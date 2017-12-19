@@ -3,7 +3,7 @@
  */
 import { $each, $extend } from './utilities'
 
-import Class from './class'
+import { Class } from './class'
 
 const AbstractEditor = Class.extend({
   onChildEditorChange: function (editor) {
@@ -33,7 +33,6 @@ const AbstractEditor = Class.extend({
     return 12
   },
   init: function (options) {
-    console.log(this.jsoneditor.defaults)
     this.jsoneditor = options.jsoneditor
 
     this.theme = this.jsoneditor.theme

@@ -4,33 +4,32 @@
  */
 // Inspired by base2 and Prototype
 
-let initializing = false
-let fnTest = /xyz/.test(function () { this.xyz = 'xyz' }) ? /\b_super\b/ : /.*/
-// The base Class implementation (does nothing)
-const Class = function () { }
+var Class
 
-function convertArgumentsToArray (args) {
-  return Array.prototype.slice.apply(args)
-}
+var initializing = false
+var fnTest = /xyz/.test(function () { window.postMessage('xyz') }) ? /\b_super\b/ : /.*/
+
+// The base Class implementation (does nothing)
+Class = function () { }
 
 // Create a new Class that inherits from this class
-const _ext = function (prop) {
-  let _super = this.prototype
+Class.extend = function extend (prop) {
+  var _super = this.prototype
 
   // Instantiate a base class (but only create the instance,
   // don't run the init constructor)
   initializing = true
-  let prototype = new this()
+  var prototype = new this()
   initializing = false
 
   // Copy the properties over onto the new prototype
-  for (let name in prop) {
+  for (var name in prop) {
     // Check if we're overwriting an existing function
     prototype[name] = typeof prop[name] === 'function' &&
       typeof _super[name] === 'function' && fnTest.test(prop[name])
       ? (function (name, fn) {
         return function () {
-          let tmp = this._super
+          var tmp = this._super
 
           // Add a new ._super() method that is the same method
           // but on the super-class
@@ -38,18 +37,13 @@ const _ext = function (prop) {
 
           // The method only need to be bound temporarily, so we
           // remove it when we're done executing
-          let ret = fn.apply(this, [this].concat(convertArgumentsToArray(arguments)))
+          var ret = fn.apply(this, arguments)
           this._super = tmp
 
           return ret
         }
       })(name, prop[name])
-      : (function (fn) {
-        return function () {
-          let ret = fn.apply(this, [this].concat(convertArgumentsToArray(arguments)))
-          return ret
-        }
-      })(prop[name])
+      : prop[name]
   }
 
   // The dummy class constructor
@@ -65,11 +59,9 @@ const _ext = function (prop) {
   Class.prototype.constructor = Class
 
   // And make this class extendable
-  Class.extend = _ext
+  Class.extend = extend
 
   return Class
 }
 
-Class.extend = _ext
-
-module.exports = Class
+export { Class }

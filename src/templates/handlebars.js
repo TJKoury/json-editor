@@ -1,3 +1,3 @@
-JSONEditor.defaults.templates.handlebars = function() {
-  return window.Handlebars;
-};
+module.exports = function () {
+  return window.Handlebars
+}

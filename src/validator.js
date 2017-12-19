@@ -1,4 +1,4 @@
-import Class from './class'
+import { Class } from './class'
 import {$extend, $each} from './utilities'
 import { defaults } from './defaults'
 export default Class.extend({

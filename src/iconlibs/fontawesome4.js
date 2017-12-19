@@ -1,8 +1,8 @@
-JSONEditor.defaults.iconlibs.fontawesome4 = JSONEditor.AbstractIconLib.extend({
+module.exports = {
   mapping: {
     collapse: 'caret-square-o-down',
     expand: 'caret-square-o-right',
-    "delete": 'times',
+    'delete': 'times',
     edit: 'pencil',
     add: 'plus',
     cancel: 'ban',
@@ -11,4 +11,4 @@ JSONEditor.defaults.iconlibs.fontawesome4 = JSONEditor.AbstractIconLib.extend({
     movedown: 'arrow-down'
   },
   icon_prefix: 'fa fa-'
-});
+}

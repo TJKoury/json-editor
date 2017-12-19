@@ -1,8 +1,8 @@
-JSONEditor.defaults.iconlibs.foundation2 = JSONEditor.AbstractIconLib.extend({
+module.exports = {
   mapping: {
     collapse: 'minus',
     expand: 'plus',
-    "delete": 'remove',
+    'delete': 'remove',
     edit: 'edit',
     add: 'add-doc',
     cancel: 'error',
@@ -11,4 +11,4 @@ JSONEditor.defaults.iconlibs.foundation2 = JSONEditor.AbstractIconLib.extend({
     movedown: 'down-arrow'
   },
   icon_prefix: 'foundicon-'
-});
+}

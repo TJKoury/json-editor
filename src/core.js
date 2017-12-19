@@ -545,14 +545,20 @@ JSONEditor.prototype = {
 JSONEditor.defaults = defaults
 JSONEditor.AbstractTheme = AbstractTheme
 JSONEditor.AbstractEditor = AbstractEditor
-
+JSONEditor.AbstractIconLib = AbstractIconLib
 JSONEditor.addTheme = function (name, theme) {
-  JSONEditor.defaults.themes[name] = JSONEditor.AbstractTheme.extend(theme)
+  let self = this
+  self.defaults.themes[name] = self.AbstractTheme.extend(theme)
 }
 
 JSONEditor.addEditor = function (name, editor) {
   let self = this
   self.defaults.editors[name] = self.AbstractEditor.extend(editor)
+}
+
+JSONEditor.addIconLib = function (name, iconLib) {
+  let self = this
+  self.defaults.iconlibs[iconLib] = self.AbstractIconLib.extend(iconLib)
 }
 
 export default JSONEditor
